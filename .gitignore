@@ -3,6 +3,7 @@
 
 # Keep this file tracked so the rule persists
 !.gitignore
+!.htaccess
 
 # Keep only deployment output at repository root
 !index.html
