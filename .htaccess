@@ -1,27 +1,19 @@
-Options -MultiViews
-
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
-
-  # If dist exists, serve the built app from there even when repo root is deployed.
-  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
-
-  # Root -> dist index
-  RewriteRule ^$ dist/index.html [L]
 
   # Serve existing files/dirs at root directly.
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # If requested path exists inside dist, serve it from dist.
-  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f [OR]
-  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -d
-  RewriteRule ^(.+)$ dist/$1 [L]
+  # Serve built assets from dist when the repository root is deployed.
+  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
+  RewriteRule ^(favicon\.ico|robots\.txt|placeholder\.svg)$ dist/$1 [L]
 
-  # Final SPA fallback for dist build.
-  RewriteRule ^ dist/index.html [L]
+  # Serve the production app from dist.
+  RewriteRule ^$ dist/index.html [L]
+  RewriteRule ^.*$ dist/index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
