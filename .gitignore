@@ -4,6 +4,10 @@
 # Keep this file tracked so the rule persists
 !.gitignore
 
-# Keep only dist and all its contents
-!dist/
-!dist/**
+# Keep only deployment output at repository root
+!index.html
+!robots.txt
+!favicon.ico
+!placeholder.svg
+!assets/
+!assets/**
