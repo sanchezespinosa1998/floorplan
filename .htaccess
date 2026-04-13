@@ -1,12 +1,24 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteBase /
 
+  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
   RewriteRule ^dist/ - [L]
+
+  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
   RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
+
+  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
   RewriteRule ^(favicon\.ico|robots\.txt|placeholder\.svg)$ dist/$1 [L]
+
+  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
   RewriteRule ^$ dist/index.html [L]
-  RewriteRule ^.*$ dist/index.html [L]
+
+  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
+  RewriteCond %{REQUEST_URI} !^/assets/
+  RewriteCond %{REQUEST_URI} !^/dist/
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ dist/index.html [L]
 </IfModule>
 
 <IfModule mod_mime.c>
