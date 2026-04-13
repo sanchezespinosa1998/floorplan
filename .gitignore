@@ -13,3 +13,9 @@
 !placeholder.svg
 !assets/
 !assets/**
+
+# Keep production build output and Apache config tracked for deployment
+!dist/
+!dist/**
+!public/
+!public/.htaccess
