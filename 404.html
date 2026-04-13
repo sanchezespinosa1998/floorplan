@@ -9,8 +9,9 @@
         var path = window.location.pathname || "/";
         var query = window.location.search || "";
         var hash = window.location.hash || "";
-        var target = "/#" + path + query + hash;
-        window.location.replace(target);
+        var target = new URL("./dist/", window.location.href);
+        target.hash = path + query + hash;
+        window.location.replace(target.toString());
       })();
     </script>
   </head>

@@ -2,16 +2,9 @@
   RewriteEngine On
   RewriteBase /
 
-  # Serve existing files/dirs at root directly.
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
-
-  # Serve built assets from dist when the repository root is deployed.
+  RewriteRule ^dist/ - [L]
   RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
   RewriteRule ^(favicon\.ico|robots\.txt|placeholder\.svg)$ dist/$1 [L]
-
-  # Serve the production app from dist.
   RewriteRule ^$ dist/index.html [L]
   RewriteRule ^.*$ dist/index.html [L]
 </IfModule>
