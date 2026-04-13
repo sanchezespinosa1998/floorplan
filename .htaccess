@@ -1,18 +1,31 @@
+Options -MultiViews
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Serve existing files/directories directly
+  # If dist exists, serve the built app from there even when repo root is deployed.
+  RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
+
+  # Root -> dist index
+  RewriteRule ^$ dist/index.html [L]
+
+  # Serve existing files/dirs at root directly.
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # SPA fallback: route all other requests to index.html
-  RewriteRule ^ index.html [L]
+  # If requested path exists inside dist, serve it from dist.
+  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f [OR]
+  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -d
+  RewriteRule ^(.+)$ dist/$1 [L]
+
+  # Final SPA fallback for dist build.
+  RewriteRule ^ dist/index.html [L]
 </IfModule>
 
-# Ensure correct MIME types for JavaScript modules
 <IfModule mod_mime.c>
-  AddType application/javascript .js
   AddType text/javascript .js
+  AddType text/javascript .mjs
+  AddType text/css .css
 </IfModule>
