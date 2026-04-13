@@ -1,55 +1,27 @@
 // @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import { useThree } from '@react-three/fiber';
-import { IFCLoader } from 'web-ifc-three/IFCLoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as THREE from 'three';
 
-interface RevitModelProps {
+interface Model3DProps {
   file: File;
   orbitRef?: React.RefObject<any>;
-  unitMode?: RevitUnitMode;
+  unitMode?: ModelUnitMode;
   manualScale?: number;
   onLoadStart?: () => void;
   onLoadEnd?: () => void;
   onError?: (msg: string) => void;
 }
 
-export type RevitUnitMode = 'auto' | 'm' | 'cm' | 'mm' | 'ft';
-
-type DetectedUnitMode = RevitUnitMode | 'unknown';
-
-const IFC_PREFIX_TO_SCALE: Record<string, number> = {
-  EXA: 1e18,
-  PETA: 1e15,
-  TERA: 1e12,
-  GIGA: 1e9,
-  MEGA: 1e6,
-  KILO: 1e3,
-  HECTO: 1e2,
-  DECA: 1e1,
-  DECI: 1e-1,
-  CENTI: 1e-2,
-  MILLI: 1e-3,
-  MICRO: 1e-6,
-  NANO: 1e-9,
-};
-
-const roundTo = (value: number, decimals = 3) => {
-  const factor = 10 ** decimals;
-  return Math.round(value * factor) / factor;
-};
-
-const roundToGrid = (value: number, grid = 0.5) => {
-  if (!Number.isFinite(value) || value <= 0) return value;
-  return Math.max(grid, Math.round(value / grid) * grid);
-};
+export type ModelUnitMode = 'auto' | 'm' | 'cm' | 'mm' | 'ft';
+export type RevitUnitMode = ModelUnitMode;
 
 // Snap to 0.5m grid
 const snap = (v: number) => Math.round(v * 2) / 2;
 
-const getUnitScaleForMode = (mode: RevitUnitMode) => {
+const getUnitScaleForMode = (mode: ModelUnitMode) => {
   switch (mode) {
     case 'mm':
       return 0.001;
@@ -64,43 +36,7 @@ const getUnitScaleForMode = (mode: RevitUnitMode) => {
   }
 };
 
-const guessIfcScaleFromText = async (file: File): Promise<{ unit: DetectedUnitMode; scale: number } | null> => {
-  try {
-    const text = await file.text();
-    const upper = text.toUpperCase();
-
-    const siMatches = upper.match(/IFCSIUNIT\([^;]*\.LENGTHUNIT\.[^;]*\)/g);
-    if (siMatches?.length) {
-      for (const entry of siMatches) {
-        if (!entry.includes('.METRE.')) continue;
-        const prefixMatch = entry.match(/\.(EXA|PETA|TERA|GIGA|MEGA|KILO|HECTO|DECA|DECI|CENTI|MILLI|MICRO|NANO)\./);
-        if (prefixMatch?.[1]) {
-          const prefix = prefixMatch[1];
-          const scale = IFC_PREFIX_TO_SCALE[prefix];
-          if (!scale) continue;
-          if (prefix === 'MILLI') return { unit: 'mm', scale };
-          if (prefix === 'CENTI') return { unit: 'cm', scale };
-          return { unit: 'm', scale };
-        }
-        return { unit: 'm', scale: 1 };
-      }
-    }
-
-    if (upper.includes("'FOOT'") || upper.includes('.FOOT.')) {
-      return { unit: 'ft', scale: 0.3048 };
-    }
-
-    if (upper.includes("'INCH'") || upper.includes('.INCH.')) {
-      return { unit: 'unknown', scale: 0.0254 };
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-};
-
-export function RevitModel({
+export function Model3D({
   file,
   orbitRef,
   unitMode = 'auto',
@@ -108,7 +44,7 @@ export function RevitModel({
   onLoadStart,
   onLoadEnd,
   onError,
-}: RevitModelProps) {
+}: Model3DProps) {
   const { scene, camera } = useThree();
   const modelRef = useRef<THREE.Object3D | null>(null);
 
@@ -121,9 +57,7 @@ export function RevitModel({
 
     const cleanup = () => URL.revokeObjectURL(url);
 
-    const ifcScalePromise = ext === 'ifc' ? guessIfcScaleFromText(file) : Promise.resolve(null);
-
-    const applyToScene = async (object: THREE.Object3D) => {
+    const applyToScene = (object: THREE.Object3D) => {
       // --- Compute raw bounding box before any repositioning ---
       object.position.set(0, 0, 0);
       object.rotation.set(0, 0, 0);
@@ -145,24 +79,12 @@ export function RevitModel({
         autoDetectedScale = 0.01;  // centimetres → metres
       }
 
-      const ifcDetected = unitMode === 'auto' ? await ifcScalePromise : null;
-
       let baseUnitScale = autoDetectedScale;
-      let baseUnitMode: RevitUnitMode = 'auto';
-      let source: 'ifc-metadata' | 'bbox-heuristic' | 'manual' = 'bbox-heuristic';
-      let detectedUnit: DetectedUnitMode = 'unknown';
 
       if (unitMode === 'auto') {
-        if (ifcDetected?.scale) {
-          baseUnitScale = ifcDetected.scale;
-          detectedUnit = ifcDetected.unit;
-          baseUnitMode = ifcDetected.unit === 'unknown' ? 'auto' : ifcDetected.unit;
-          source = 'ifc-metadata';
-        }
+        baseUnitScale = autoDetectedScale;
       } else {
         baseUnitScale = getUnitScaleForMode(unitMode);
-        baseUnitMode = unitMode;
-        source = 'manual';
       }
 
       const sanitizedManualScale = Number.isFinite(manualScale) && manualScale > 0 ? manualScale : 1;
@@ -172,28 +94,6 @@ export function RevitModel({
         object.scale.setScalar(baseFinalScale);
         object.updateMatrixWorld(true);
       }
-
-      // Ajuste isotropico para que las dimensiones en planta encajen en celdas de 0.5 m.
-      let gridFitScale = 1;
-      if (ext === 'ifc') {
-        const preGridFitBox = new THREE.Box3().setFromObject(object);
-        const preGridFitSize = preGridFitBox.getSize(new THREE.Vector3());
-        const targetX = roundToGrid(preGridFitSize.x, 0.5);
-        const targetZ = roundToGrid(preGridFitSize.z, 0.5);
-        const ratioX = preGridFitSize.x > 0 ? targetX / preGridFitSize.x : 1;
-        const ratioZ = preGridFitSize.z > 0 ? targetZ / preGridFitSize.z : 1;
-        const averagedRatio = (ratioX + ratioZ) / 2;
-        if (Number.isFinite(averagedRatio) && averagedRatio > 0) {
-          gridFitScale = averagedRatio;
-        }
-      }
-
-      if (gridFitScale !== 1) {
-        object.scale.multiplyScalar(gridFitScale);
-        object.updateMatrixWorld(true);
-      }
-
-      const finalScale = baseFinalScale * gridFitScale;
 
       // --- Recompute after scale ---
       const box = new THREE.Box3().setFromObject(object);
@@ -242,16 +142,7 @@ export function RevitModel({
       cleanup();
     };
 
-    if (ext === 'ifc') {
-      const loader = new IFCLoader();
-      loader.ifcManager.setWasmPath('/');
-      loader.load(url, applyToScene, undefined, (err) => {
-        console.error('IFC load error:', err);
-        onError?.('No se pudo cargar el archivo IFC. Asegúrate de que sea un archivo IFC válido.');
-        onLoadEnd?.();
-        cleanup();
-      });
-    } else if (ext === 'gltf' || ext === 'glb') {
+    if (ext === 'gltf' || ext === 'glb') {
       const loader = new GLTFLoader();
       loader.load(url, (gltf) => applyToScene(gltf.scene), undefined, (err) => {
         console.error('GLTF load error:', err);
@@ -268,7 +159,7 @@ export function RevitModel({
         cleanup();
       });
     } else {
-      onError?.(`Formato "${ext}" no soportado. Usa IFC, GLTF, GLB u OBJ.`);
+      onError?.(`Formato "${ext}" no soportado. Usa GLTF, GLB u OBJ.`);
       onLoadEnd?.();
       cleanup();
     }
@@ -299,20 +190,20 @@ function disposeObject(obj: THREE.Object3D) {
 
 // ---------------------------------------------------------------------------
 
-interface RevitUploadPanelProps {
-  revitFile: File | null;
+interface ModelUploadPanelProps {
+  modelFile: File | null;
   isLoading: boolean;
   onFileSelect: (file: File) => void;
   onClear: () => void;
 }
 
-export function RevitUploadPanel({ revitFile, isLoading, onFileSelect, onClear }: RevitUploadPanelProps) {
+export function ModelUploadPanel({ modelFile, isLoading, onFileSelect, onClear }: ModelUploadPanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase();
-    const supported = ['ifc', 'gltf', 'glb', 'obj'];
+    const supported = ['gltf', 'glb', 'obj'];
     if (!supported.includes(ext ?? '')) {
       alert(`Formato no soportado. Usa: ${supported.join(', ').toUpperCase()}`);
       return;
@@ -327,7 +218,7 @@ export function RevitUploadPanel({ revitFile, isLoading, onFileSelect, onClear }
     if (file) handleFile(file);
   };
 
-  if (revitFile) {
+  if (modelFile) {
     return (
       <div className="revit-panel revit-panel--loaded">
         <div className="revit-panel__icon">
@@ -336,14 +227,14 @@ export function RevitUploadPanel({ revitFile, isLoading, onFileSelect, onClear }
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
         </div>
-        <span className="revit-panel__filename" title={revitFile.name}>
-          {revitFile.name}
+        <span className="revit-panel__filename" title={modelFile.name}>
+          {modelFile.name}
         </span>
         {isLoading && <span className="revit-panel__loading">Cargando…</span>}
         <button
           className="revit-panel__clear"
           onClick={onClear}
-          title="Eliminar modelo Revit"
+          title="Eliminar modelo 3D"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -361,18 +252,18 @@ export function RevitUploadPanel({ revitFile, isLoading, onFileSelect, onClear }
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
-      title="Cargar archivo de Revit (IFC, GLTF, GLB, OBJ)"
+      title="Cargar modelo 3D (GLTF, GLB, OBJ)"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="17 8 12 3 7 8" />
         <line x1="12" y1="3" x2="12" y2="15" />
       </svg>
-      <span>Cargar Revit</span>
+      <span>Cargar modelo</span>
       <input
         ref={inputRef}
         type="file"
-        accept=".ifc,.gltf,.glb,.obj"
+        accept=".gltf,.glb,.obj"
         style={{ display: 'none' }}
         onChange={(e) => {
           const f = e.target.files?.[0];
@@ -382,5 +273,15 @@ export function RevitUploadPanel({ revitFile, isLoading, onFileSelect, onClear }
       />
     </div>
   );
+}
+
+export const RevitModel = Model3D;
+export function RevitUploadPanel(props: {
+  revitFile: File | null;
+  isLoading: boolean;
+  onFileSelect: (file: File) => void;
+  onClear: () => void;
+}) {
+  return <ModelUploadPanel modelFile={props.revitFile} isLoading={props.isLoading} onFileSelect={props.onFileSelect} onClear={props.onClear} />;
 }
 

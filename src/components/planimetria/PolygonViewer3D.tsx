@@ -12,7 +12,7 @@ import { useViewerInteractionState } from '@/components/planimetria/viewer/useVi
 import { ObjectListPanel } from '@/components/planimetria/viewer/ObjectListPanel';
 import { ObjectPropertiesPanel } from '@/components/planimetria/viewer/ObjectPropertiesPanel';
 import { ViewerEditingToolbar } from '@/components/planimetria/viewer/ViewerEditingToolbar';
-import { RevitModel } from '@/components/planimetria/viewer/RevitModelLoader';
+import { Model3D } from '@/components/planimetria/viewer/RevitModelLoader';
 import {
   BoxStandMesh,
   BoxStandProperties,
@@ -2372,9 +2372,9 @@ export default function PolygonViewer3D({ onBack, fairId = 'f1' }) {
             opacity={1}
           />
 
-          {/* Modelo Revit cargado por el usuario — base del suelo */}
+          {/* Modelo 3D cargado por el usuario — base del suelo */}
           {revitFile && (
-            <RevitModel
+            <Model3D
               file={revitFile}
               orbitRef={orbitRef}
               unitMode="auto"
