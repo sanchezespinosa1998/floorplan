@@ -1,21 +1,31 @@
-# Ignore everything by default
-*
+# Dependencies
+node_modules/
 
-# Keep this file tracked so the rule persists
-!.gitignore
-!.htaccess
+# Build output
+dist/
+build/
 
-# Keep only deployment output at repository root
-!index.html
-!404.html
-!robots.txt
-!favicon.ico
-!placeholder.svg
-!assets/
-!assets/**
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# Keep production build output and Apache config tracked for deployment
-!dist/
-!dist/**
-!public/
-!public/.htaccess
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+
+# Misc
+*.tgz

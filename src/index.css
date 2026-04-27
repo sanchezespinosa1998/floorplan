@@ -1,0 +1,674 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Custom border radius */
+    --radius: 32px;
+
+    /* Figma design tokens */
+    --size-xxxxs: 5.24px;
+    --size-xxxs: 6.55px;
+    --size-xxs: 8.19px;
+    --size-base: 10.24px;
+    --size-small: 12.8px;
+    --size-p: 16px;
+    --size-h6: 20px;
+    --size-h5: 25px;
+    --size-h4: 31.25px;
+    --size-h3: 39.06px;
+    --size-h2: 48.83px;
+    --size-h1: 61.04px;
+
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 84 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --primary-surface: 84 61% 16%;
+
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 85%;
+
+    --accent: 258 90% 66%;
+    --accent-foreground: 0 0% 98%;
+    --accent-surface: 259 31% 19%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --destructive-surface: 0 61% 16%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 84 100% 50%;
+
+    --radius: 4.19px;
+
+    --status-available: 84 100% 50%;
+    --status-proposed: 258 90% 66%;
+    --status-pending: 25 95% 53%;
+    --status-approved: 161 94% 30%;
+    --status-blocked: 215 16% 47%;
+    --status-sold: 340 84% 63%;
+    --status-unavailable: 220 7% 16%;
+    --status-conflict: 0 100% 50%;
+    --status-review: 258 90% 66%;
+
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 84 100% 50%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 84 100% 50%;
+
+    --topbar: 0 0% 8%;
+    --topbar-foreground: 0 0% 98%;
+
+    --info: 258 90% 66%;
+    --info-foreground: 0 0% 98%;
+    --info-surface: 259 31% 19%;
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 98%;
+    --warning-surface: 23 51% 9%;
+    --success: 161 94% 30%;
+    --success-foreground: 0 0% 98%;
+    --success-surface: 159 41% 13%;
+    --neutral: 215 16% 47%;
+    --neutral-foreground: 0 0% 98%;
+    --neutral-surface: 220 7% 16%;
+
+    --db-bg-0: #0a0a0a;
+    --db-bg-1: #14181d;
+    --db-bg-2: #1e232b;
+    --db-bg-3: #101418;
+    --db-card: #161b21;
+    --db-border: #313b48;
+    --db-border-strong: #4a5769;
+    --db-text: #d6dde6;
+    --db-text-strong: #f4f7fb;
+    --db-text-muted: #93a1b3;
+    --db-accent: #b8f35d;
+    --db-accent-contrast: #0a0a0a;
+    --db-accent-surface: #2f4720;
+    --db-grad-top: #1a1f26;
+    --db-grad-bottom: #141920;
+    --db-shadow-soft: 0 4px 7.525px rgba(6, 10, 16, 0.55);
+    --db-shadow: 0 10px 18px rgba(5, 9, 15, 0.45);
+  }
+
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+  }
+
+  [data-theme="base"] {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+
+    --primary: 84 100% 50%;
+    --primary-foreground: 0 0% 5%;
+    --ring: 84 100% 50%;
+
+    --db-bg-0: #0a0a0a;
+    --db-bg-1: #141414;
+    --db-bg-2: #1a1a1a;
+    --db-bg-3: #101010;
+    --db-card: #0f0f0f;
+    --db-border: #333333;
+    --db-border-strong: #4b4b4b;
+    --db-text: #dadada;
+    --db-text-strong: #fafafa;
+    --db-text-muted: #9a9a9a;
+    --db-accent: #8fee00;
+    --db-accent-contrast: #0a0a0a;
+    --db-accent-surface: #2f4310;
+    --db-grad-top: #141414;
+    --db-grad-bottom: #0a0a0a;
+    --db-shadow-soft: 0 4px 7.525px rgba(0, 0, 0, 0.75);
+    --db-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+
+    --status-available: 84 100% 50%;
+    --status-proposed: 258 90% 66%;
+    --status-pending: 25 95% 53%;
+    --status-approved: 161 94% 30%;
+    --status-blocked: 215 16% 47%;
+    --status-sold: 84 100% 50%;
+    --status-unavailable: 220 7% 16%;
+    --status-conflict: 0 100% 50%;
+    --status-review: 258 90% 66%;
+  }
+
+  [data-theme="light"] {
+    --background: 30 25% 93%;
+    --foreground: 25 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 20% 15%;
+    --border: 30 20% 82%;
+    --input: 30 20% 82%;
+
+    --db-bg-0: #fef7f0;
+    --db-bg-1: #ffffff;
+    --db-bg-2: #f5e6d8;
+    --db-bg-3: #fcf9f4;
+    --db-card: #ffffff;
+    --db-border: #e0d0b8;
+    --db-border-strong: #c4b090;
+    --db-text: #2d2820;
+    --db-text-strong: #1a1612;
+    --db-text-muted: #7a7068;
+    --db-accent: #f97316;
+    --db-accent-contrast: #ffffff;
+    --db-accent-surface: #ffedd5;
+    --db-grad-top: #ffffff;
+    --db-grad-bottom: #f5ebe0;
+    --db-shadow-soft: 0 4px 7.525px rgba(45, 40, 32, 0.1);
+    --db-shadow: 0 10px 18px rgba(45, 40, 32, 0.07);
+
+    --primary: 25 95% 55%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 25 95% 55%;
+
+    --status-available: 150 50% 30%;
+    --status-proposed: 280 60% 50%;
+    --status-pending: 35 85% 50%;
+    --status-approved: 155 45% 35%;
+    --status-blocked: 0 8% 42%;
+    --status-sold: 340 65% 45%;
+    --status-unavailable: 0 6% 38%;
+    --status-conflict: 0 70% 45%;
+    --status-review: 290 55% 50%;
+  }
+
+  [data-theme="ocean"] {
+    --db-bg-0: #010409;
+    --db-bg-1: #030a18;
+    --db-bg-2: #051228;
+    --db-bg-3: #02060c;
+    --db-card: #040c20;
+    --db-border: #0a1a38;
+    --db-border-strong: #102850;
+    --db-text: #9ec4e2;
+    --db-text-strong: #d4e8f8;
+    --db-text-muted: #5a88b8;
+    --db-accent: #34d399;
+    --db-accent-contrast: #041a12;
+    --db-accent-surface: #064830;
+    --db-grad-top: #081830;
+    --db-grad-bottom: #040c18;
+    --db-shadow-soft: 0 4px 7.525px rgba(4, 12, 30, 0.7);
+    --db-shadow: 0 10px 18px rgba(4, 12, 30, 0.55);
+
+    --primary: 160 70% 50%;
+    --primary-foreground: 160 80% 10%;
+    --ring: 160 70% 50%;
+
+    --status-available: 170 55% 35%;
+    --status-proposed: 300 65% 60%;
+    --status-pending: 45 85% 50%;
+    --status-approved: 165 50% 40%;
+    --status-blocked: 225 12% 45%;
+    --status-sold: 350 65% 50%;
+    --status-unavailable: 225 10% 35%;
+    --status-conflict: 10 75% 50%;
+    --status-review: 295 60% 60%;
+  }
+
+  [data-theme="sunset"] {
+    --db-bg-0: #080208;
+    --db-bg-1: #120812;
+    --db-bg-2: #1a0f1a;
+    --db-bg-3: #0a040a;
+    --db-card: #140a14;
+    --db-border: #2d152d;
+    --db-border-strong: #3f1f3f;
+    --db-text: #e0b8d8;
+    --db-text-strong: #f8e4f0;
+    --db-text-muted: #a078a0;
+    --db-accent: #facc15;
+    --db-accent-contrast: #141200;
+    --db-accent-surface: #3a3610;
+    --db-grad-top: #1c141c;
+    --db-grad-bottom: #100810;
+    --db-shadow-soft: 0 4px 7.525px rgba(20, 8, 20, 0.65);
+    --db-shadow: 0 10px 18px rgba(20, 8, 20, 0.5);
+
+    --primary: 55 95% 60%;
+    --primary-foreground: 55 100% 10%;
+    --ring: 55 95% 60%;
+
+    --status-available: 150 45% 32%;
+    --status-proposed: 310 55% 55%;
+    --status-pending: 25 88% 50%;
+    --status-approved: 145 45% 38%;
+    --status-blocked: 25 10% 45%;
+    --status-sold: 355 60% 50%;
+    --status-unavailable: 25 8% 32%;
+    --status-conflict: 5 70% 50%;
+    --status-review: 320 50% 55%;
+  }
+
+  [data-theme="forest"] {
+    --db-bg-0: #070f09;
+    --db-bg-1: #111e14;
+    --db-bg-2: #1a2e1e;
+    --db-bg-3: #0c1a0f;
+    --db-card: #142018;
+    --db-border: #2e5038;
+    --db-border-strong: #427050;
+    --db-text: #caecd4;
+    --db-text-strong: #edfff2;
+    --db-text-muted: #7dc490;
+    --db-accent: #f59e0b;
+    --db-accent-contrast: #1c0e00;
+    --db-accent-surface: #463408;
+    --db-grad-top: #1c2e20;
+    --db-grad-bottom: #152419;
+    --db-shadow-soft: 0 4px 7.525px rgba(3, 14, 6, 0.62);
+    --db-shadow: 0 10px 18px rgba(3, 14, 6, 0.5);
+
+    --primary: 38 95% 52%;
+    --primary-foreground: 35 100% 8%;
+    --ring: 38 95% 52%;
+
+    --status-available: 158 76% 60%;
+    --status-proposed: 257 76% 72%;
+    --status-pending: 35 92% 60%;
+    --status-approved: 146 68% 54%;
+    --status-blocked: 152 14% 58%;
+    --status-sold: 340 80% 66%;
+    --status-unavailable: 148 12% 46%;
+    --status-conflict: 1 86% 62%;
+    --status-review: 266 72% 72%;
+  }
+
+  [data-theme="dune"] {
+    --db-bg-0: #110f08;
+    --db-bg-1: #1e1a10;
+    --db-bg-2: #2c2718;
+    --db-bg-3: #181410;
+    --db-card: #252016;
+    --db-border: #524530;
+    --db-border-strong: #706040;
+    --db-text: #f0e2c4;
+    --db-text-strong: #fff8e8;
+    --db-text-muted: #b89860;
+    --db-accent: #00c9b1;
+    --db-accent-contrast: #001e1a;
+    --db-accent-surface: #06403a;
+    --db-grad-top: #2e2618;
+    --db-grad-bottom: #241f13;
+    --db-shadow-soft: 0 4px 7.525px rgba(14, 10, 4, 0.62);
+    --db-shadow: 0 10px 18px rgba(14, 10, 4, 0.5);
+
+    --primary: 172 100% 40%;
+    --primary-foreground: 178 100% 8%;
+    --ring: 172 100% 40%;
+
+    --status-available: 40 92% 54%;
+    --status-proposed: 268 72% 68%;
+    --status-pending: 29 96% 56%;
+    --status-approved: 148 64% 50%;
+    --status-blocked: 34 16% 54%;
+    --status-sold: 351 82% 64%;
+    --status-unavailable: 32 12% 43%;
+    --status-conflict: 1 84% 60%;
+    --status-review: 268 68% 68%;
+  }
+
+  [data-theme="graphite"] {
+    --db-bg-0: #101114;
+    --db-bg-1: #1a1c21;
+    --db-bg-2: #242832;
+    --db-bg-3: #14171c;
+    --db-card: #1d2027;
+    --db-border: #3d4555;
+    --db-border-strong: #59647a;
+    --db-text: #d9dfeb;
+    --db-text-strong: #f5f7fd;
+    --db-text-muted: #9fa9bf;
+    --db-accent: #60a5fa;
+    --db-accent-contrast: #0b1626;
+    --db-accent-surface: #243e66;
+    --db-grad-top: #282d38;
+    --db-grad-bottom: #1f242d;
+    --db-shadow-soft: 0 4px 7.525px rgba(10, 12, 18, 0.58);
+    --db-shadow: 0 10px 18px rgba(10, 12, 18, 0.45);
+
+    --primary: 213 94% 68%;
+    --primary-foreground: 220 60% 10%;
+    --ring: 213 94% 68%;
+
+    --status-available: 205 92% 67%;
+    --status-proposed: 265 78% 74%;
+    --status-pending: 36 92% 62%;
+    --status-approved: 157 69% 57%;
+    --status-blocked: 223 16% 62%;
+    --status-sold: 339 82% 69%;
+    --status-unavailable: 223 13% 50%;
+    --status-conflict: 1 85% 65%;
+    --status-review: 266 74% 74%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Sora', system-ui, -apple-system, sans-serif;
+    font-size: var(--size-small);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Sora', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .ui-interactive-base {
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .ui-hover-surface {
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
+
+  .ui-hover-surface:not(:disabled):hover {
+    background-color: var(--db-bg-2);
+    border-color: var(--db-border-strong);
+  }
+
+  .ui-hover-surface:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .ui-hover-lift {
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    will-change: transform;
+  }
+
+  .ui-hover-lift:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--db-shadow);
+    border-color: var(--db-border-strong);
+  }
+
+  .ui-hover-accent {
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+
+  .ui-hover-accent:not(:disabled):hover {
+    background-color: var(--db-accent);
+    color: var(--db-accent-contrast);
+    border-color: var(--db-accent);
+    transform: translateY(-1px);
+  }
+
+  .ui-hover-accent:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .ui-focus-panel {
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .ui-focus-panel:focus-within {
+    border-color: var(--db-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--db-accent) 25%, transparent);
+  }
+
+  .ui-row-hover {
+    transition: background-color 150ms ease;
+  }
+
+  .ui-row-hover:hover {
+    background-color: var(--db-bg-2);
+  }
+
+  .ui-hover-outline {
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
+
+  .ui-hover-outline:not(:disabled):hover {
+    background-color: var(--db-bg-2);
+    border-color: var(--db-border-strong);
+  }
+
+  .ui-theme-card {
+    background-image: linear-gradient(180deg, var(--db-grad-top) 0%, var(--db-grad-bottom) 100%);
+    box-shadow: var(--db-shadow-soft);
+  }
+
+  .ui-cell-block {
+    border: 1px solid transparent;
+    transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  }
+
+  .ui-cell-block:hover {
+    background-color: color-mix(in srgb, var(--db-bg-2) 70%, transparent);
+    border-color: var(--db-border-strong);
+    transform: translateY(-1px);
+  }
+
+  [data-theme] [class*="bg-[#0a0a0a]"] {
+    background-color: var(--db-bg-0) !important;
+  }
+
+  [data-theme] [class*="bg-[#141414]"] {
+    background-color: var(--db-bg-1) !important;
+  }
+
+  [data-theme] [class*="bg-[#101010]"] {
+    background-color: var(--db-bg-3) !important;
+  }
+
+  [data-theme] [class*="bg-[#0f0f0f]"] {
+    background-color: var(--db-card) !important;
+  }
+
+  [data-theme] [class*="bg-[#111111]"] {
+    background-color: color-mix(in srgb, var(--db-bg-3) 70%, var(--db-bg-1) 30%) !important;
+  }
+
+  [data-theme] [class*="bg-[#22140b]"] {
+    background-color: color-mix(in srgb, hsl(var(--status-pending)) 20%, var(--db-bg-1) 80%) !important;
+  }
+
+  [data-theme] [class*="bg-[#1b260b]"] {
+    background-color: color-mix(in srgb, var(--db-accent-surface) 65%, var(--db-bg-1) 35%) !important;
+  }
+
+  [data-theme] [class*="border-[#333333]"] {
+    border-color: var(--db-border) !important;
+  }
+
+  [data-theme] [class*="border-[#2f4310]"] {
+    border-color: var(--db-accent-surface) !important;
+  }
+
+  [data-theme] [class*="border-[#2a2a2a]"] {
+    border-color: var(--db-border) !important;
+  }
+
+  [data-theme] [class*="border-[#f97316]"] {
+    border-color: hsl(var(--status-pending)) !important;
+  }
+
+  [data-theme] [class*="text-[#dadada]"] {
+    color: var(--db-text) !important;
+  }
+
+  [data-theme] [class*="text-[#fafafa]"] {
+    color: var(--db-text-strong) !important;
+  }
+
+  [data-theme] [class*="text-[#9a9a9a]"] {
+    color: var(--db-text-muted) !important;
+  }
+
+  [data-theme] [class*="text-[#f2f2f2]"] {
+    color: var(--db-text-strong) !important;
+  }
+
+  [data-theme] [class*="text-[#e5e5e5]"] {
+    color: var(--db-text-strong) !important;
+  }
+
+  [data-theme] [class*="text-[#8fee00]"] {
+    color: var(--db-accent) !important;
+  }
+
+  [data-theme] [class*="text-[#f97316]"] {
+    color: hsl(var(--status-pending)) !important;
+  }
+
+  [data-theme] [class*="bg-[#8fee00]"] {
+    background-color: var(--db-accent) !important;
+    color: var(--db-accent-contrast) !important;
+  }
+
+  [data-theme] [class*="border-[#8fee00]"] {
+    border-color: var(--db-accent) !important;
+  }
+
+  [data-theme] [class*="bg-[#2f4310]"] {
+    background-color: var(--db-accent-surface) !important;
+  }
+
+  [data-theme] [class*="bg-[#1d260f]"] {
+    background-color: color-mix(in srgb, var(--db-accent-surface) 70%, var(--db-bg-1) 30%) !important;
+  }
+
+  [data-theme] [class*="shadow-[0_4px_7.525px_rgba(0,0,0,0.75)]"] {
+    box-shadow: var(--db-shadow-soft) !important;
+  }
+
+  [data-theme] [class*="placeholder:text-[#8fee00]"]::placeholder {
+    color: var(--db-accent) !important;
+    opacity: 1;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+  }
+
+  /* Dashboard cards border radius - 32px */
+  .bg-card,
+  main .bg-card,
+  .page-content .bg-card,
+  .dashboard-card,
+  section.bg-card,
+  div[class*="bg-card"] {
+    border-radius: var(--radius) !important;
+  }
+
+  /* Staggered fade-in for table rows */
+  @keyframes table-row-fade-in {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-table-row {
+    animation: table-row-fade-in 0.4s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Staggered fade-in for cards (grid view) */
+  @keyframes card-fade-in {
+    from {
+      opacity: 0;
+      transform: translateX(-20px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  .animate-card {
+    animation: card-fade-in 0.45s cubic-bezier(0.22, 0.72, 0.32, 1) forwards;
+    opacity: 0;
+  }
+  
+  /* Tables in dashboard */
+  main table.bg-card tr:first-child td:first-child,
+  main table.bg-card tr:first-child th:first-child {
+    border-top-left-radius: var(--radius);
+  }
+  main table.bg-card tr:first-child td:last-child,
+  main table.bg-card tr:first-child th:last-child {
+    border-top-right-radius: var(--radius);
+  }
+}
