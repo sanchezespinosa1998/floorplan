@@ -1,9 +1,27 @@
 // ============ TYPES ============
+// PortfolioMap — 3D portfolio & exposure visualizer
+// Internal type names (User, Stand, Fair, Venue, Booking) are preserved for
+// backwards compatibility with the 3D viewer and API simulation. Their
+// semantic meaning has shifted:
+//   Venue   → Mandate            (Equity, Fixed Income, Multi-Asset, Alternatives)
+//   Fair    → Portfolio          (a managed strategy within a mandate)
+//   Stand   → Position / Holding (an individual asset in the portfolio)
+//   Booking → Trade order        (pending allocation request)
+// Status enums are reused: status values map to position / order states.
+
 export type UserRole = 'admin' | 'architect' | 'commercial' | 'organizer' | 'exhibitor' | 'viewer';
+// Position states: available = "Open exposure", pending = "Pending settlement", reserved = "Active position"
 export type StandStatus = 'available' | 'pending' | 'reserved';
+// Trade-order states: available = "Rejected", pending = "Pending compliance", reserved = "Filled"
 export type BookingStatus = 'available' | 'pending' | 'reserved';
+// Portfolio lifecycle: planificación = "Pre-launch", comercialización = "Subscriptions open", en_curso = "Live", finalizada = "Closed"
 export type FairStatus = 'planificación' | 'comercialización' | 'en_curso' | 'finalizada';
+// Rebalance state: draft = "Working rebalance", published = "Approved rebalance"
 export type FairVersionStatus = 'draft' | 'published';
+
+export type AssetClass = 'Equity' | 'Bond' | 'ETF' | 'Derivative' | 'Cash';
+export type AssetGeography = 'Europe' | 'North America' | 'APAC' | 'Emerging' | 'Global';
+export type RiskScore = 'low' | 'medium' | 'high';
 
 export interface User {
   id: string;
@@ -95,20 +113,33 @@ export interface Fair {
 }
 
 export interface Stand {
+  // Identifier and 3D scene fields (legacy, preserved for the visualizer)
   id: string;
-  code: string;
-  fairId: string;
+  code: string;          // Repurposed as the asset ticker (AAPL, ASML, ...)
+  fairId: string;        // Portfolio ID
   x: number;
   y: number;
   width: number;
   height: number;
-  status: StandStatus;
-  type: string;
-  area: number;
-  company?: string;
-  price?: number;
-  zone: string;
+  status: StandStatus;   // Position state — see StandStatus comments
+  type: string;          // Repurposed as AssetClass
+  area: number;          // Repurposed as exposure in M€ (millions of euro)
+  company?: string;      // Repurposed as issuer / asset legal name
+  price?: number;        // Repurposed as last traded price in EUR
+  zone: string;          // Repurposed as sector
   notes?: string;
+  // Fintech-specific fields (new)
+  ticker?: string;
+  assetClass?: AssetClass;
+  sector?: string;
+  geography?: AssetGeography;
+  weight?: number;       // % of portfolio
+  exposure?: number;     // EUR
+  pnlAbs?: number;       // EUR
+  pnlPct?: number;       // %
+  riskScore?: RiskScore;
+  lastPriceEUR?: number;
+  currency?: string;
 }
 
 export interface Booking {
@@ -157,253 +188,366 @@ export interface OrganizerAssignment {
 
 // ============ MOCK DATA ============
 
+// Roles map to fintech personas:
+//   admin     → Head of Investment / CIO
+//   architect → Risk Analyst (mandate construction & rebalances)
+//   commercial → Portfolio Manager (trade execution)
+//   organizer → Compliance / Audit
+//   exhibitor → Beneficiary (read-only client portal)
+//   viewer    → External Auditor / read-only
+
 export const currentUser: User = {
   id: 'u1',
-  name: 'María García',
-  email: 'maria@fairplan.com',
+  name: 'Maria Garcia',
+  email: 'maria.garcia@portfoliomap.io',
   role: 'admin',
-  company: 'FairPlan',
+  company: 'PortfolioMap Capital',
 };
 
 export const users: User[] = [
   currentUser,
-  { id: 'u2', name: 'Carlos Ruiz', email: 'carlos@fairplan.com', role: 'architect', company: 'FairPlan' },
-  { id: 'u3', name: 'Ana López', email: 'ana@fairplan.com', role: 'commercial', company: 'FairPlan' },
-  { id: 'u4', name: 'Pedro Martín', email: 'pedro@fairplan.com', role: 'commercial', company: 'FairPlan' },
-  { id: 'u5', name: 'Laura Sánchez', email: 'laura@expositor.com', role: 'exhibitor', company: 'Expositor Corp' },
-  { id: 'u6', name: 'Jorge Fernández', email: 'jorge@fairplan.com', role: 'viewer', company: 'FairPlan' },
-  { id: 'u7', name: 'Isabel Torres', email: 'isabel@fairplan.com', role: 'architect', company: 'FairPlan' },
-  { id: 'u8', name: 'Marta Romero', email: 'marta@organizacion.com', role: 'organizer', company: 'Organización SL' },
+  { id: 'u2', name: 'Carlos Ruiz',     email: 'carlos.ruiz@portfoliomap.io',    role: 'architect',  company: 'PortfolioMap Capital' },
+  { id: 'u3', name: 'Ana Lopez',       email: 'ana.lopez@portfoliomap.io',      role: 'commercial', company: 'PortfolioMap Capital' },
+  { id: 'u4', name: 'Pedro Martin',    email: 'pedro.martin@portfoliomap.io',   role: 'commercial', company: 'PortfolioMap Capital' },
+  { id: 'u5', name: 'Laura Sanchez',   email: 'laura.sanchez@cliente.com',      role: 'exhibitor',  company: 'Sanchez Family Office' },
+  { id: 'u6', name: 'Jorge Fernandez', email: 'jorge.fernandez@portfoliomap.io', role: 'viewer',    company: 'KPMG Audit' },
+  { id: 'u7', name: 'Isabel Torres',   email: 'isabel.torres@portfoliomap.io',  role: 'architect',  company: 'PortfolioMap Capital' },
+  { id: 'u8', name: 'Marta Romero',    email: 'marta.romero@portfoliomap.io',   role: 'organizer',  company: 'PortfolioMap Capital' },
 ];
 
+// Mandates (top-level grouping). `area` carries AUM in M€, `pavilions` carries the
+// number of strategies (sleeves) under that mandate, `fairCount` the number of
+// active portfolios.
 export const venues: Venue[] = [
-  { id: 'v1', name: 'IFEMA Madrid', location: 'Madrid, Spain', area: 200000, pavilions: 12, description: 'Flagship fair venue in Spain with 12 halls and over 200,000m² of surface.', fairCount: 4 },
-  { id: 'v2', name: 'Fira Barcelona – Gran Via', location: 'Barcelona, Spain', area: 240000, pavilions: 8, description: 'Modern fair complex in L\'Hospitalet de Llobregat designed by Toyo Ito.', fairCount: 3 },
-  { id: 'v3', name: 'BEC Bilbao', location: 'Bilbao, Spain', area: 150000, pavilions: 6, description: 'Bilbao Exhibition Centre, major fair venue in the Basque Country.', fairCount: 2 },
-  { id: 'v4', name: 'Valencia Fair', location: 'Valencia, Spain', area: 130000, pavilions: 7, description: 'Historic fair venue next to the City of Arts and Sciences.', fairCount: 3 },
+  { id: 'v1', name: 'Multi-Asset Strategic',     location: 'Madrid, Spain',     area: 1200, pavilions: 4, description: 'Flagship multi-asset mandate with global exposure across equities, fixed income, ETFs and hedging overlays. 1.2 B€ AUM.', fairCount: 1 },
+  { id: 'v2', name: 'European Equity Mandate',   location: 'Frankfurt, Germany', area: 420,  pavilions: 3, description: 'Concentrated long-only European equity book, focused on quality compounders and selected dividend names.', fairCount: 1 },
+  { id: 'v3', name: 'Fixed Income Mandate',      location: 'London, United Kingdom', area: 480, pavilions: 4, description: 'Multi-strategy fixed income book covering sovereigns, IG credit, EM hard-currency debt and short-duration cash management.', fairCount: 2 },
+  { id: 'v4', name: 'Alternatives & Hedging',    location: 'Luxembourg',        area: 280,  pavilions: 3, description: 'Tactical hedging overlay using FX forwards, equity index futures, options and credit derivatives. Notional 280 M€.', fairCount: 2 },
 ];
 
-// Fairs con versiones integradas (migrado de projects + projectVersions)
+// Portfolios. Each "fair" represents a managed strategy.
+// occupancy = invested ratio (%), totalStands = number of holdings,
+// reservedStands = active positions, freeStands = dry-powder slots,
+// pendingReservations = pending compliance trades.
+// Versions = rebalances (draft = working rebalance, published = approved snapshot).
 export const fairs: Fair[] = [
-  { 
-    id: 'f1', 
-    name: 'FITUR', 
-    edition: '2026',
-    startDate: '2026-01-21', 
-    endDate: '2026-01-25', 
-    venueId: 'v1', 
-    venueName: 'IFEMA Madrid', 
-    status: 'comercialización',
-    occupancy: 65,
-    totalStands: 215,
-    freeStands: 74,
-    reservedStands: 141,
-    pendingReservations: 20,
-    responsible: 'Ana López',
+  {
+    id: 'f1',
+    name: 'Master Multi-Asset Fund',
+    edition: 'Live · 2026',
+    startDate: '2024-01-15',
+    endDate: '2030-12-31',
+    venueId: 'v1',
+    venueName: 'Multi-Asset Strategic',
+    status: 'en_curso',
+    occupancy: 87,
+    totalStands: 45,
+    freeStands: 6,
+    reservedStands: 35,
+    pendingReservations: 4,
+    responsible: 'Ana Lopez',
     lastActivity: '2026-03-11T09:30:00',
     currentVersionId: 'v-f1-4',
     versions: [
-      { id: 'v-f1-1', fairId: 'f1', label: 'v1.0', status: 'published', createdAt: '2025-07-02T10:15:00', createdBy: 'Carlos Ruiz', summary: 'Initial hall base with 96 stands', occupancySnapshot: 41, standsSnapshot: 96, pendingSnapshot: 14 },
-      { id: 'v-f1-2', fairId: 'f1', label: 'v2.0', status: 'published', createdAt: '2025-09-18T12:00:00', createdBy: 'Carlos Ruiz', summary: 'Aisles and access reorganization', basedOnVersionId: 'v-f1-1', basePublishedId: 'v-f1-1', occupancySnapshot: 53, standsSnapshot: 108, pendingSnapshot: 11 },
-      { id: 'v-f1-3', fairId: 'f1', label: 'v2.3', status: 'published', createdAt: '2026-02-28T09:20:00', createdBy: 'Isabel Torres', summary: 'Adjustments in premium areas and services', basedOnVersionId: 'v-f1-2', basePublishedId: 'v-f1-2', occupancySnapshot: 68, standsSnapshot: 120, pendingSnapshot: 9 },
-      { id: 'v-f1-4', fairId: 'f1', label: 'v2.4', status: 'published', createdAt: '2026-03-10T11:15:00', createdBy: 'Carlos Ruiz', summary: 'Technical conflict correction in zone E', basedOnVersionId: 'v-f1-3', basePublishedId: 'v-f1-3', occupancySnapshot: 72, standsSnapshot: 120, pendingSnapshot: 8 },
-      { id: 'v-f1-draft', fairId: 'f1', label: 'Draft técnico', status: 'draft', createdAt: '2026-03-11T09:30:00', updatedAt: '2026-03-11T09:30:00', rowVersion: 1, createdBy: 'Carlos Ruiz', summary: 'Trabajo en curso basado en v2.4', basedOnVersionId: 'v-f1-4', basePublishedId: 'v-f1-4', occupancySnapshot: 72, standsSnapshot: 120, pendingSnapshot: 8 },
+      { id: 'v-f1-1',     fairId: 'f1', label: 'Inception v1.0',        status: 'published', createdAt: '2024-01-15T10:15:00',                                       createdBy: 'Carlos Ruiz',   summary: 'Initial portfolio construction. NAV anchored at 100. 28 holdings across 4 asset classes.',                                                       occupancySnapshot: 72, standsSnapshot: 28, pendingSnapshot: 4 },
+      { id: 'v-f1-2',     fairId: 'f1', label: 'Q3-2025 rebalance',     status: 'published', createdAt: '2025-09-15T12:00:00',                                       createdBy: 'Carlos Ruiz',   summary: 'Reduced US tech exposure by 4 pts. Added EM debt (BRZ30, MEX32) and EUR cash buffer.',          basedOnVersionId: 'v-f1-1', basePublishedId: 'v-f1-1', occupancySnapshot: 81, standsSnapshot: 38, pendingSnapshot: 6 },
+      { id: 'v-f1-3',     fairId: 'f1', label: 'Q4-2025 rebalance',     status: 'published', createdAt: '2025-12-18T09:20:00',                                       createdBy: 'Isabel Torres', summary: 'Hedged FX exposure with EURUSD 3M FWD. Trimmed TSMC after run-up. Added LVMH overweight.',      basedOnVersionId: 'v-f1-2', basePublishedId: 'v-f1-2', occupancySnapshot: 84, standsSnapshot: 42, pendingSnapshot: 5 },
+      { id: 'v-f1-4',     fairId: 'f1', label: 'Q1-2026 rebalance',     status: 'published', createdAt: '2026-03-04T11:15:00',                                       createdBy: 'Carlos Ruiz',   summary: 'Initiated DAX put protection. Increased Bund 10Y. Active book at 87% invested, 6.5% dry-powder.', basedOnVersionId: 'v-f1-3', basePublishedId: 'v-f1-3', occupancySnapshot: 87, standsSnapshot: 45, pendingSnapshot: 4 },
+      { id: 'v-f1-draft', fairId: 'f1', label: 'Working draft Q2-2026', status: 'draft',     createdAt: '2026-03-11T09:30:00', updatedAt: '2026-03-11T09:30:00', rowVersion: 1, createdBy: 'Carlos Ruiz', summary: 'Sizing up Healthcare overweight (NOVN, AZN). Pending compliance review of EM cap.',           basedOnVersionId: 'v-f1-4', basePublishedId: 'v-f1-4', occupancySnapshot: 87, standsSnapshot: 45, pendingSnapshot: 4 },
     ]
   },
-  { 
-    id: 'f2', 
-    name: 'Mobile World Congress', 
-    edition: '2026',
-    startDate: '2026-02-23', 
-    endDate: '2026-02-26', 
-    venueId: 'v2', 
-    venueName: 'Fira Barcelona – Gran Via', 
-    status: 'planificación',
-    occupancy: 15,
-    totalStands: 80,
-    freeStands: 68,
-    reservedStands: 12,
-    pendingReservations: 3,
-    responsible: 'Ana López',
+  {
+    id: 'f2',
+    name: 'European Quality Equity',
+    edition: 'Live · 2026',
+    startDate: '2024-04-01',
+    endDate: '2030-12-31',
+    venueId: 'v2',
+    venueName: 'European Equity Mandate',
+    status: 'en_curso',
+    occupancy: 72,
+    totalStands: 22,
+    freeStands: 6,
+    reservedStands: 16,
+    pendingReservations: 2,
+    responsible: 'Pedro Martin',
     lastActivity: '2026-03-09T11:00:00',
     currentVersionId: 'v-f2-1',
     versions: [
-      { id: 'v-f2-1', fairId: 'f2', label: 'Draft técnico', status: 'draft', createdAt: '2026-03-09T11:00:00', updatedAt: '2026-03-09T11:00:00', rowVersion: 1, createdBy: 'Ana López', summary: 'Initial proposal under commercial review', occupancySnapshot: 15, standsSnapshot: 80, pendingSnapshot: 3 },
+      { id: 'v-f2-1', fairId: 'f2', label: 'Q1-2026 rebalance', status: 'published', createdAt: '2026-02-20T11:00:00', updatedAt: '2026-02-20T11:00:00', rowVersion: 2, createdBy: 'Pedro Martin', summary: 'Initiated NESN, MC, ASML overweights. Trimmed BBVA on bank-credit risk.', occupancySnapshot: 72, standsSnapshot: 22, pendingSnapshot: 2 },
     ]
   },
-  { 
-    id: 'f3', 
-    name: 'Alimentaria', 
-    edition: '2026',
-    startDate: '2026-04-06', 
-    endDate: '2026-04-09', 
-    venueId: 'v2', 
-    venueName: 'Fira Barcelona – Gran Via', 
-    status: 'comercialización',
-    occupancy: 45,
-    totalStands: 110,
-    freeStands: 61,
-    reservedStands: 49,
-    pendingReservations: 6,
-    responsible: 'Pedro Martín',
-    lastActivity: '2026-03-11T08:15:00',
+  {
+    id: 'f3',
+    name: 'Sovereign & IG Credit',
+    edition: 'Live · 2026',
+    startDate: '2023-06-01',
+    endDate: '2030-12-31',
+    venueId: 'v3',
+    venueName: 'Fixed Income Mandate',
+    status: 'en_curso',
+    occupancy: 94,
+    totalStands: 32,
+    freeStands: 2,
+    reservedStands: 30,
+    pendingReservations: 1,
+    responsible: 'Isabel Torres',
+    lastActivity: '2026-03-10T08:15:00',
     currentVersionId: 'v-f3-3',
     versions: [
-      { id: 'v-f3-1', fairId: 'f3', label: 'v1.0', status: 'published', createdAt: '2025-10-20T10:00:00', createdBy: 'Pedro Martín', summary: 'Initial design for the consumer-goods hall', occupancySnapshot: 29, standsSnapshot: 98, pendingSnapshot: 12 },
-      { id: 'v-f3-2', fairId: 'f3', label: 'v1.2', status: 'published', createdAt: '2025-12-10T09:35:00', createdBy: 'Carlos Ruiz', summary: 'Flow and main aisle adjustments', basedOnVersionId: 'v-f3-1', basePublishedId: 'v-f3-1', occupancySnapshot: 36, standsSnapshot: 104, pendingSnapshot: 10 },
-      { id: 'v-f3-3', fairId: 'f3', label: 'v1.5', status: 'published', createdAt: '2026-03-01T08:05:00', createdBy: 'Carlos Ruiz', summary: 'Current version for sales phase', basedOnVersionId: 'v-f3-2', basePublishedId: 'v-f3-2', occupancySnapshot: 45, standsSnapshot: 110, pendingSnapshot: 6 },
-      { id: 'v-f3-draft', fairId: 'f3', label: 'Draft técnico', status: 'draft', createdAt: '2026-03-11T08:15:00', updatedAt: '2026-03-11T08:15:00', rowVersion: 1, createdBy: 'Pedro Martín', summary: 'Trabajo en curso basado en v1.5', basedOnVersionId: 'v-f3-3', basePublishedId: 'v-f3-3', occupancySnapshot: 45, standsSnapshot: 110, pendingSnapshot: 6 },
+      { id: 'v-f3-1', fairId: 'f3', label: 'Inception v1.0',     status: 'published', createdAt: '2023-06-12T10:00:00',                                       createdBy: 'Isabel Torres', summary: 'Inception book: 60% sovereigns, 40% IG corporates. Duration 6.2y.',                                                                  occupancySnapshot: 90, standsSnapshot: 24, pendingSnapshot: 1 },
+      { id: 'v-f3-2', fairId: 'f3', label: 'Duration extension', status: 'published', createdAt: '2025-09-22T09:35:00',                                       createdBy: 'Carlos Ruiz',   summary: 'Extended duration to 7.4y on hold-to-maturity sovereigns. Added 30Y Bund.',  basedOnVersionId: 'v-f3-1', basePublishedId: 'v-f3-1', occupancySnapshot: 92, standsSnapshot: 28, pendingSnapshot: 2 },
+      { id: 'v-f3-3', fairId: 'f3', label: 'Q1-2026 rebalance',  status: 'published', createdAt: '2026-02-15T08:05:00',                                       createdBy: 'Carlos Ruiz',   summary: 'Trimmed BBB IG (1.5%). Added US 5Y Treasury. Carry budget 4.1%.',           basedOnVersionId: 'v-f3-2', basePublishedId: 'v-f3-2', occupancySnapshot: 94, standsSnapshot: 32, pendingSnapshot: 1 },
     ]
   },
-  { 
-    id: 'f4', 
-    name: 'Cevisama', 
-    edition: '2026',
-    startDate: '2026-02-10', 
-    endDate: '2026-02-14', 
-    venueId: 'v4', 
-    venueName: 'Fair de Valencia', 
-    status: 'en_curso',
-    occupancy: 91,
-    totalStands: 75,
-    freeStands: 7,
-    reservedStands: 68,
-    pendingReservations: 2,
-    responsible: 'Ana López',
-    lastActivity: '2026-03-10T14:30:00',
-    currentVersionId: 'v-f4-2',
-    versions: [
-      { id: 'v-f4-1', fairId: 'f4', label: 'v2.0', status: 'published', createdAt: '2026-01-10T13:40:00', createdBy: 'Isabel Torres', summary: 'Reinforcement of premium ceramic areas', occupancySnapshot: 84, standsSnapshot: 72, pendingSnapshot: 5 },
-      { id: 'v-f4-2', fairId: 'f4', label: 'v2.2', status: 'published', createdAt: '2026-03-03T14:30:00', createdBy: 'Carlos Ruiz', summary: 'Final blocks and sales validation', basedOnVersionId: 'v-f4-1', basePublishedId: 'v-f4-1', occupancySnapshot: 91, standsSnapshot: 75, pendingSnapshot: 2 },
-      { id: 'v-f4-draft', fairId: 'f4', label: 'Draft técnico', status: 'draft', createdAt: '2026-03-10T14:30:00', updatedAt: '2026-03-10T14:30:00', rowVersion: 1, createdBy: 'Carlos Ruiz', summary: 'Trabajo en curso basado en v2.2', basedOnVersionId: 'v-f4-2', basePublishedId: 'v-f4-2', occupancySnapshot: 91, standsSnapshot: 75, pendingSnapshot: 2 },
-    ]
-  },
-  { 
-    id: 'f5', 
-    name: 'BIEMH', 
-    edition: '2026',
-    startDate: '2026-05-25', 
-    endDate: '2026-05-29', 
-    venueId: 'v3', 
-    venueName: 'BEC Bilbao', 
+  {
+    id: 'f4',
+    name: 'EM Debt Tactical',
+    edition: 'Pre-launch · 2026',
+    startDate: '2026-04-01',
+    endDate: '2030-12-31',
+    venueId: 'v3',
+    venueName: 'Fixed Income Mandate',
     status: 'planificación',
-    occupancy: 5,
-    totalStands: 60,
-    freeStands: 57,
-    reservedStands: 3,
-    pendingReservations: 0,
-    responsible: 'Carlos Ruiz',
-    lastActivity: '2026-03-08T10:00:00',
-    currentVersionId: 'v-f5-1',
+    occupancy: 0,
+    totalStands: 12,
+    freeStands: 12,
+    reservedStands: 0,
+    pendingReservations: 3,
+    responsible: 'Pedro Martin',
+    lastActivity: '2026-03-08T11:00:00',
+    currentVersionId: 'v-f4-1',
     versions: [
-      { id: 'v-f5-1', fairId: 'f5', label: 'Draft técnico', status: 'draft', createdAt: '2026-03-08T10:00:00', updatedAt: '2026-03-08T10:00:00', rowVersion: 1, createdBy: 'Carlos Ruiz', summary: 'Initial structure for technical review', occupancySnapshot: 5, standsSnapshot: 60, pendingSnapshot: 0 },
+      { id: 'v-f4-1', fairId: 'f4', label: 'Working draft', status: 'draft', createdAt: '2026-03-08T11:00:00', updatedAt: '2026-03-08T11:00:00', rowVersion: 1, createdBy: 'Pedro Martin', summary: 'Pre-launch sizing. Initial seed 120 M€ across 12 EM hard-currency sovereigns.', occupancySnapshot: 0, standsSnapshot: 12, pendingSnapshot: 3 },
     ]
   },
-  { 
-    id: 'f6', 
-    name: 'ARCOmadrid', 
-    edition: '2026',
-    startDate: '2026-02-19', 
-    endDate: '2026-02-23', 
-    venueId: 'v1', 
-    venueName: 'IFEMA Madrid', 
-    status: 'finalizada',
+  {
+    id: 'f5',
+    name: 'Tactical Hedging Overlay',
+    edition: 'Live · 2026',
+    startDate: '2025-01-15',
+    endDate: '2030-12-31',
+    venueId: 'v4',
+    venueName: 'Alternatives & Hedging',
+    status: 'en_curso',
     occupancy: 100,
-    totalStands: 50,
+    totalStands: 8,
     freeStands: 0,
-    reservedStands: 50,
+    reservedStands: 8,
+    pendingReservations: 1,
+    responsible: 'Carlos Ruiz',
+    lastActivity: '2026-03-10T14:30:00',
+    currentVersionId: 'v-f5-2',
+    versions: [
+      { id: 'v-f5-1', fairId: 'f5', label: 'Inception v1.0',    status: 'published', createdAt: '2025-01-15T13:40:00',                                       createdBy: 'Carlos Ruiz', summary: 'Initial hedging book: EURUSD 3M FWD, S&P 500 short futures, iTraxx CDX.',                                                  occupancySnapshot: 100, standsSnapshot: 6, pendingSnapshot: 0 },
+      { id: 'v-f5-2', fairId: 'f5', label: 'Q1-2026 rebalance', status: 'published', createdAt: '2026-03-03T14:30:00',                                       createdBy: 'Carlos Ruiz', summary: 'Added DAX 16500 put for downside protection. Re-rolled FX hedge to 6M.',  basedOnVersionId: 'v-f5-1', basePublishedId: 'v-f5-1', occupancySnapshot: 100, standsSnapshot: 8, pendingSnapshot: 1 },
+    ]
+  },
+  {
+    id: 'f6',
+    name: 'Multi-Sector Yield (closed)',
+    edition: 'Wound down · 2025',
+    startDate: '2022-01-15',
+    endDate: '2025-12-31',
+    venueId: 'v3',
+    venueName: 'Fixed Income Mandate',
+    status: 'finalizada',
+    occupancy: 0,
+    totalStands: 18,
+    freeStands: 0,
+    reservedStands: 0,
     pendingReservations: 0,
-    responsible: 'María García',
-    lastActivity: '2026-02-24T10:00:00',
+    responsible: 'Maria Garcia',
+    lastActivity: '2025-12-31T16:00:00',
     currentVersionId: 'v-f6-1',
     versions: [
-      { id: 'v-f6-1', fairId: 'f6', label: 'v1.0', status: 'published', createdAt: '2026-01-15T10:00:00', createdBy: 'Carlos Ruiz', summary: 'Final version of the fair', occupancySnapshot: 100, standsSnapshot: 50, pendingSnapshot: 0 },
+      { id: 'v-f6-1', fairId: 'f6', label: 'Final NAV', status: 'published', createdAt: '2025-12-31T16:00:00', createdBy: 'Maria Garcia', summary: 'Book wound down. Final TWR +14.2% over 4 years. All capital returned to investors.', occupancySnapshot: 0, standsSnapshot: 18, pendingSnapshot: 0 },
     ]
   },
 ];
 
-// Generate stands for fair f1 (FITUR)
-const standStatuses: StandStatus[] = ['available', 'pending', 'reserved'];
-const companies = ['Iberia', 'Meliá Hotels', 'Paradores', 'Turespaña', 'Vueling', 'Booking.com', 'Amadeus', 'Barceló', 'NH Hotels', 'Iberostar', 'Renfe', 'Air Europa', 'Visit London', 'Tourism Australia', 'Japan Travel Bureau', 'Korea Tourism', 'Dubai Tourism', 'Turkish Airlines'];
-const zones = ['Zone A – Premium', 'Zone B – Standard', 'Zone C – Basic', 'Zone D – Central Aisle', 'Zone E – Corner'];
-const standTypes = ['Premium', 'Standard', 'Island', 'Corner', 'Row'];
+// 45 holdings of the Master Multi-Asset Fund (f1).
+// Total weight ≈ 100%, total exposure ≈ 1.2 B€.
+// 3D layout: 5 rows on a 9-col grid (row 0 has 8, rows 1–3 have 9, row 4 has 10 = 45).
+// 3D color is driven by riskScore (low/medium/high → green/amber/red).
+// `status` reflects position lifecycle: reserved=Active, pending=Pending settlement, available=Closed.
+interface AssetSeed {
+  ticker: string;
+  name: string;
+  assetClass: AssetClass;
+  sector: string;
+  geography: AssetGeography;
+  weight: number;       // % of portfolio (sums to ~100)
+  pnlPct: number;       // unrealized P&L %
+  riskScore: RiskScore;
+  lastPriceEUR: number; // last reference price (EUR equivalent for non-EUR books)
+  currency: string;
+  status: StandStatus;
+}
 
-export const stands: Stand[] = Array.from({ length: 48 }, (_, i) => {
-  const row = Math.floor(i / 8);
-  const col = i % 8;
-  const statusIdx = i < 5 ? 0 : i < 20 ? 1 : i < 38 ? 2 : 0;
-  const st = standStatuses[Math.min(statusIdx, standStatuses.length - 1)];
-  return {
-    id: `s${i + 1}`,
-    code: `P3-${String.fromCharCode(65 + row)}${String(col + 1).padStart(2, '0')}`,
-    fairId: 'f1',
-    x: 60 + col * 105,
-    y: 60 + row * 95,
-    width: 90,
-    height: 75,
-    status: st,
-    type: standTypes[i % standTypes.length],
-    area: [9, 12, 16, 20, 25, 30][i % 6],
-    company: st !== 'available' ? companies[i % companies.length] : undefined,
-    price: [2500, 3200, 4500, 6000, 8000][i % 5],
-    zone: zones[row % zones.length],
-  };
-});
+const assetSeeds: AssetSeed[] = [
+  // Row 0 — Top 8 exposures (>4% each)
+  { ticker: 'AAPL',     name: 'Apple Inc',                       assetClass: 'Equity',     sector: 'Technology',     geography: 'North America', weight: 6.0, pnlPct:   4.20, riskScore: 'medium', lastPriceEUR:  214.50, currency: 'USD', status: 'reserved' },
+  { ticker: 'MSFT',     name: 'Microsoft Corp',                  assetClass: 'Equity',     sector: 'Technology',     geography: 'North America', weight: 5.7, pnlPct:   6.10, riskScore: 'low',    lastPriceEUR:  378.20, currency: 'USD', status: 'reserved' },
+  { ticker: 'ASML',     name: 'ASML Holding NV',                 assetClass: 'Equity',     sector: 'Technology',     geography: 'Europe',        weight: 5.4, pnlPct:  -2.30, riskScore: 'medium', lastPriceEUR:  692.30, currency: 'EUR', status: 'reserved' },
+  { ticker: 'UST10Y',   name: 'US Treasury 3.5% 2034',           assetClass: 'Bond',       sector: 'Sovereign',      geography: 'North America', weight: 5.4, pnlPct:   1.20, riskScore: 'low',    lastPriceEUR:   99.45, currency: 'USD', status: 'reserved' },
+  { ticker: 'AGG',      name: 'iShares Core US Aggregate Bond',  assetClass: 'ETF',        sector: 'Fixed Income',   geography: 'North America', weight: 4.9, pnlPct:   0.80, riskScore: 'low',    lastPriceEUR:   95.10, currency: 'USD', status: 'reserved' },
+  { ticker: 'VTI',      name: 'Vanguard Total US Market ETF',    assetClass: 'ETF',        sector: 'Diversified',    geography: 'North America', weight: 5.0, pnlPct:   3.40, riskScore: 'low',    lastPriceEUR:  240.10, currency: 'USD', status: 'reserved' },
+  { ticker: 'NVDA',     name: 'Nvidia Corp',                     assetClass: 'Equity',     sector: 'Technology',     geography: 'North America', weight: 4.2, pnlPct:  12.80, riskScore: 'high',   lastPriceEUR:  870.40, currency: 'USD', status: 'reserved' },
+  { ticker: 'DE10Y',    name: 'German Bund 2.4% 2034',           assetClass: 'Bond',       sector: 'Sovereign',      geography: 'Europe',        weight: 4.5, pnlPct:   0.50, riskScore: 'low',    lastPriceEUR:  102.30, currency: 'EUR', status: 'reserved' },
+  // Row 1 — European core equities
+  { ticker: 'LVMH',     name: 'LVMH Moet Hennessy',              assetClass: 'Equity',     sector: 'Consumer',       geography: 'Europe',        weight: 3.7, pnlPct:   2.10, riskScore: 'medium', lastPriceEUR:  685.40, currency: 'EUR', status: 'reserved' },
+  { ticker: 'SAP',      name: 'SAP SE',                          assetClass: 'Equity',     sector: 'Technology',     geography: 'Europe',        weight: 3.2, pnlPct:   4.50, riskScore: 'low',    lastPriceEUR:  195.20, currency: 'EUR', status: 'reserved' },
+  { ticker: 'BRK.B',    name: 'Berkshire Hathaway B',            assetClass: 'Equity',     sector: 'Financials',     geography: 'North America', weight: 2.1, pnlPct:   3.90, riskScore: 'low',    lastPriceEUR:  379.80, currency: 'USD', status: 'reserved' },
+  { ticker: 'IBE',      name: 'Iberdrola SA',                    assetClass: 'Equity',     sector: 'Utilities',      geography: 'Europe',        weight: 2.0, pnlPct:   1.80, riskScore: 'low',    lastPriceEUR:   12.50, currency: 'EUR', status: 'reserved' },
+  { ticker: 'SIE',      name: 'Siemens AG',                      assetClass: 'Equity',     sector: 'Industrials',    geography: 'Europe',        weight: 1.9, pnlPct:  -1.40, riskScore: 'medium', lastPriceEUR:  174.50, currency: 'EUR', status: 'reserved' },
+  { ticker: 'ITX',      name: 'Inditex SA',                      assetClass: 'Equity',     sector: 'Consumer',       geography: 'Europe',        weight: 1.7, pnlPct:   5.20, riskScore: 'medium', lastPriceEUR:   48.90, currency: 'EUR', status: 'reserved' },
+  { ticker: 'SAN',      name: 'Banco Santander',                 assetClass: 'Equity',     sector: 'Financials',     geography: 'Europe',        weight: 1.5, pnlPct:   7.80, riskScore: 'medium', lastPriceEUR:    4.85, currency: 'EUR', status: 'reserved' },
+  { ticker: 'BBVA',     name: 'Banco Bilbao Vizcaya Argentaria', assetClass: 'Equity',     sector: 'Financials',     geography: 'Europe',        weight: 1.4, pnlPct:   9.20, riskScore: 'medium', lastPriceEUR:    9.20, currency: 'EUR', status: 'reserved' },
+  { ticker: 'TEF',      name: 'Telefonica SA',                   assetClass: 'Equity',     sector: 'Communications', geography: 'Europe',        weight: 1.3, pnlPct:  -3.10, riskScore: 'high',   lastPriceEUR:    4.10, currency: 'EUR', status: 'reserved' },
+  // Row 2 — Healthcare, EM equities, recent trades
+  { ticker: 'NOVN',     name: 'Novartis AG',                     assetClass: 'Equity',     sector: 'Healthcare',     geography: 'Europe',        weight: 1.3, pnlPct:   2.40, riskScore: 'low',    lastPriceEUR:   92.10, currency: 'CHF', status: 'pending'  },
+  { ticker: 'AZN',      name: 'AstraZeneca PLC',                 assetClass: 'Equity',     sector: 'Healthcare',     geography: 'Europe',        weight: 1.2, pnlPct:   3.10, riskScore: 'low',    lastPriceEUR:  135.80, currency: 'GBP', status: 'pending'  },
+  { ticker: 'TSM',      name: 'Taiwan Semiconductor ADR',        assetClass: 'Equity',     sector: 'Technology',     geography: 'APAC',          weight: 1.2, pnlPct:   8.40, riskScore: 'medium', lastPriceEUR:  142.30, currency: 'USD', status: 'reserved' },
+  { ticker: 'REP',      name: 'Repsol SA',                       assetClass: 'Equity',     sector: 'Energy',         geography: 'Europe',        weight: 1.1, pnlPct:  -4.60, riskScore: 'high',   lastPriceEUR:   13.45, currency: 'EUR', status: 'reserved' },
+  { ticker: 'VALE',     name: 'Vale SA ADR',                     assetClass: 'Equity',     sector: 'Materials',      geography: 'Emerging',      weight: 1.0, pnlPct:  -8.20, riskScore: 'high',   lastPriceEUR:    9.80, currency: 'USD', status: 'reserved' },
+  { ticker: 'JPM',      name: 'JPMorgan Chase',                  assetClass: 'Equity',     sector: 'Financials',     geography: 'North America', weight: 2.5, pnlPct:   5.60, riskScore: 'medium', lastPriceEUR:  195.20, currency: 'USD', status: 'reserved' },
+  { ticker: 'MEX32',    name: 'United Mexican States 4% 2032',   assetClass: 'Bond',       sector: 'Sovereign EM',   geography: 'Emerging',      weight: 0.9, pnlPct:  -1.90, riskScore: 'medium', lastPriceEUR:   89.50, currency: 'USD', status: 'reserved' },
+  { ticker: 'BRZ30',    name: 'Brazil Sovereign 3.875% 2030',    assetClass: 'Bond',       sector: 'Sovereign EM',   geography: 'Emerging',      weight: 1.1, pnlPct:   2.30, riskScore: 'high',   lastPriceEUR:   87.20, currency: 'USD', status: 'reserved' },
+  { ticker: 'F28',      name: 'Ford Motor Co 4.75% 2028',        assetClass: 'Bond',       sector: 'Corporate HY',   geography: 'North America', weight: 0.8, pnlPct:  -0.50, riskScore: 'high',   lastPriceEUR:   92.30, currency: 'USD', status: 'pending'  },
+  // Row 3 — Diversified ETFs and IG corporate credit
+  { ticker: 'VEA',      name: 'Vanguard FTSE Developed Markets', assetClass: 'ETF',        sector: 'Diversified',    geography: 'Europe',        weight: 3.0, pnlPct:   2.10, riskScore: 'low',    lastPriceEUR:   50.40, currency: 'USD', status: 'reserved' },
+  { ticker: 'IEFA',     name: 'iShares Core MSCI EAFE',          assetClass: 'ETF',        sector: 'Diversified',    geography: 'Europe',        weight: 2.3, pnlPct:   1.80, riskScore: 'low',    lastPriceEUR:   74.80, currency: 'USD', status: 'reserved' },
+  { ticker: 'LQD',      name: 'iShares iBoxx IG Corp Bond',      assetClass: 'ETF',        sector: 'Fixed Income',   geography: 'North America', weight: 1.8, pnlPct:   0.40, riskScore: 'low',    lastPriceEUR:  105.20, currency: 'USD', status: 'reserved' },
+  { ticker: 'AAPL30',   name: 'Apple 3.25% 2030',                assetClass: 'Bond',       sector: 'Corporate IG',   geography: 'North America', weight: 2.2, pnlPct:   0.90, riskScore: 'low',    lastPriceEUR:   96.50, currency: 'USD', status: 'reserved' },
+  { ticker: 'BBVA28',   name: 'BBVA Senior 4.5% 2028',           assetClass: 'Bond',       sector: 'Corporate IG',   geography: 'Europe',        weight: 1.6, pnlPct:   1.10, riskScore: 'medium', lastPriceEUR:   98.20, currency: 'EUR', status: 'reserved' },
+  { ticker: 'IBE31',    name: 'Iberdrola Green 1.5% 2031',       assetClass: 'Bond',       sector: 'Corporate IG',   geography: 'Europe',        weight: 1.0, pnlPct:   1.40, riskScore: 'low',    lastPriceEUR:   99.80, currency: 'EUR', status: 'reserved' },
+  { ticker: 'TEF28',    name: 'Telefonica 1.788% 2028',          assetClass: 'Bond',       sector: 'Corporate IG',   geography: 'Europe',        weight: 1.0, pnlPct:  -0.30, riskScore: 'medium', lastPriceEUR:   97.40, currency: 'EUR', status: 'reserved' },
+  { ticker: 'RENO27',   name: 'Renault SA 1% 2027',              assetClass: 'Bond',       sector: 'Corporate HY',   geography: 'Europe',        weight: 0.7, pnlPct:   0.20, riskScore: 'high',   lastPriceEUR:   95.10, currency: 'EUR', status: 'available' },
+  { ticker: 'UST5Y',    name: 'US Treasury 3.875% 2029',         assetClass: 'Bond',       sector: 'Sovereign',      geography: 'North America', weight: 2.5, pnlPct:   1.40, riskScore: 'low',    lastPriceEUR:  100.20, currency: 'USD', status: 'reserved' },
+  // Row 4 — Hedging, short-duration sovereigns, cash, EM ETFs
+  { ticker: 'EURUSD3M', name: 'EUR/USD Forward 3M',              assetClass: 'Derivative', sector: 'FX Hedge',       geography: 'Global',        weight: 1.8, pnlPct:   0.80, riskScore: 'medium', lastPriceEUR:    1.085, currency: 'EUR', status: 'reserved' },
+  { ticker: 'ESM4',     name: 'S&P 500 E-mini Future Dec',       assetClass: 'Derivative', sector: 'Equity Hedge',   geography: 'North America', weight: 1.8, pnlPct:   3.20, riskScore: 'high',   lastPriceEUR: 5210.00, currency: 'USD', status: 'reserved' },
+  { ticker: 'DAXPUT',   name: 'DAX 16500 Put 6M',                assetClass: 'Derivative', sector: 'Equity Hedge',   geography: 'Europe',        weight: 0.8, pnlPct: -12.50, riskScore: 'high',   lastPriceEUR:  145.00, currency: 'EUR', status: 'reserved' },
+  { ticker: 'ITRAXX',   name: 'iTraxx Crossover CDS 5Y',         assetClass: 'Derivative', sector: 'Credit Hedge',   geography: 'Europe',        weight: 0.6, pnlPct:  -2.10, riskScore: 'high',   lastPriceEUR:  380.00, currency: 'EUR', status: 'reserved' },
+  { ticker: 'UST3M',    name: 'US T-Bill 3M',                    assetClass: 'Bond',       sector: 'Sovereign',      geography: 'North America', weight: 1.5, pnlPct:   0.90, riskScore: 'low',    lastPriceEUR:   99.70, currency: 'USD', status: 'reserved' },
+  { ticker: 'DE5Y',     name: 'German Bund 2.1% 2029',           assetClass: 'Bond',       sector: 'Sovereign',      geography: 'Europe',        weight: 1.0, pnlPct:   0.40, riskScore: 'low',    lastPriceEUR:  101.50, currency: 'EUR', status: 'reserved' },
+  { ticker: 'EURCASH',  name: 'EUR Cash & Equivalents',          assetClass: 'Cash',       sector: 'Liquidity',      geography: 'Europe',        weight: 2.3, pnlPct:   0.00, riskScore: 'low',    lastPriceEUR:    1.00, currency: 'EUR', status: 'reserved' },
+  { ticker: 'USDMM',    name: 'USD Money Market',                assetClass: 'Cash',       sector: 'Liquidity',      geography: 'North America', weight: 1.6, pnlPct:   0.00, riskScore: 'low',    lastPriceEUR:    1.00, currency: 'USD', status: 'reserved' },
+  { ticker: 'VWO',      name: 'Vanguard FTSE EM ETF',            assetClass: 'ETF',        sector: 'Diversified',    geography: 'Emerging',      weight: 0.9, pnlPct:   4.10, riskScore: 'medium', lastPriceEUR:   44.80, currency: 'USD', status: 'available' },
+  { ticker: 'IEMG',     name: 'iShares Core MSCI EM',            assetClass: 'ETF',        sector: 'Diversified',    geography: 'Emerging',      weight: 0.7, pnlPct:   3.80, riskScore: 'medium', lastPriceEUR:   53.40, currency: 'USD', status: 'available' },
+];
 
+const PORTFOLIO_AUM_EUR = 1_200_000_000;        // 1.2 B€
+const ROW_COLS = [8, 9, 9, 9, 10] as const;     // 8 + 9 + 9 + 9 + 10 = 45
+
+export const stands: Stand[] = (() => {
+  const out: Stand[] = [];
+  let cursor = 0;
+  for (let rowIdx = 0; rowIdx < ROW_COLS.length; rowIdx++) {
+    const cols = ROW_COLS[rowIdx];
+    for (let col = 0; col < cols; col++) {
+      const seed = assetSeeds[cursor];
+      const exposure = (seed.weight / 100) * PORTFOLIO_AUM_EUR;
+      const exposureM = Math.round(exposure / 100_000) / 10;          // M€ with 1 decimal
+      const pnlAbs = Math.round(exposure * (seed.pnlPct / 100));
+      out.push({
+        id: `s${cursor + 1}`,
+        code: seed.ticker,
+        fairId: 'f1',
+        x: 60 + col * 105,
+        y: 60 + rowIdx * 95,
+        width: 90,
+        height: 75,
+        status: seed.status,
+        type: seed.assetClass,
+        area: exposureM,
+        company: seed.name,
+        price: seed.lastPriceEUR,
+        zone: seed.sector,
+        ticker: seed.ticker,
+        assetClass: seed.assetClass,
+        sector: seed.sector,
+        geography: seed.geography,
+        weight: seed.weight,
+        exposure: Math.round(exposure),
+        pnlAbs,
+        pnlPct: seed.pnlPct,
+        riskScore: seed.riskScore,
+        lastPriceEUR: seed.lastPriceEUR,
+        currency: seed.currency,
+      });
+      cursor++;
+    }
+  }
+  return out;
+})();
+
+// Trade orders (was: bookings). status maps to order lifecycle:
+//   pending  → awaiting compliance / pre-trade check
+//   reserved → filled
+//   available→ rejected / cancelled
 export const bookings: Booking[] = [
-  { id: 'r1', standCode: 'P3-B01', standId: 's9', fairId: 'f1', fairName: 'FITUR 2026', company: 'Meliá Hotels', requester: 'Ana López', requesterRole: 'commercial', date: '2026-03-10', status: 'pending', validators: ['Carlos Ruiz'], comments: 'Premium stand requested for main brand.', risk: 'Stand adjacent to direct competitor' },
-  { id: 'r2', standCode: 'P3-B02', standId: 's10', fairId: 'f1', fairName: 'FITUR 2026', company: 'Paradores', requester: 'Ana López', requesterRole: 'commercial', date: '2026-03-09', status: 'pending', validators: ['Carlos Ruiz'], comments: 'Stand expansion compared to previous edition.' },
-  { id: 'r3', standCode: 'P3-C01', standId: 's17', fairId: 'f1', fairName: 'FITUR 2026', company: 'Amadeus', requester: 'Pedro Martín', requesterRole: 'commercial', date: '2026-03-08', status: 'reserved', validators: ['Carlos Ruiz', 'María García'], comments: 'Approved without changes.' },
-  { id: 'r4', standCode: 'P3-A03', standId: 's3', fairId: 'f1', fairName: 'FITUR 2026', company: 'Turespaña', requester: 'Ana López', requesterRole: 'commercial', date: '2026-03-07', status: 'pending', validators: ['Carlos Ruiz'], comments: 'Dimension change request. Architect reviewing feasibility.', risk: 'Requires adjacent aisle adjustment' },
-  { id: 'r5', standCode: 'P3-D02', standId: 's26', fairId: 'f1', fairName: 'FITUR 2026', company: 'Visit London', requester: 'Pedro Martín', requesterRole: 'commercial', date: '2026-03-06', status: 'available', validators: ['Carlos Ruiz'], comments: 'Stand location incompatible with evacuation regulations.' },
-  { id: 'r6', standCode: 'P3-E01', standId: 's33', fairId: 'f1', fairName: 'FITUR 2026', company: 'Tourism Australia', requester: 'Ana López', requesterRole: 'commercial', date: '2026-03-05', status: 'pending', validators: ['Carlos Ruiz'], comments: 'Request temporarily on hold.', risk: 'Overlap with Japan Travel Bureau request' },
-  { id: 'r7', standCode: 'P3-C05', standId: 's21', fairId: 'f1', fairName: 'FITUR 2026', company: 'Barceló', requester: 'Pedro Martín', requesterRole: 'commercial', date: '2026-03-11', status: 'pending', validators: [], comments: 'New request. Pending validator assignment.' },
-  { id: 'r8', standCode: 'P3-D04', standId: 's28', fairId: 'f1', fairName: 'FITUR 2026', company: 'NH Hotels', requester: 'Ana López', requesterRole: 'commercial', date: '2026-03-04', status: 'reserved', validators: ['Carlos Ruiz', 'María García'], comments: 'Island stand reserved with premium services.' },
+  { id: 'r1', standCode: 'NOVN',    standId: 's17', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'Novartis AG',                   requester: 'Ana Lopez',    requesterRole: 'commercial', date: '2026-03-10', status: 'pending',  validators: ['Carlos Ruiz'],                 comments: 'BUY 16 M€. Healthcare overweight ahead of Q2 earnings season.',           risk: 'Sector concentration approaching 8% target' },
+  { id: 'r2', standCode: 'AZN',     standId: 's18', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'AstraZeneca PLC',               requester: 'Ana Lopez',    requesterRole: 'commercial', date: '2026-03-09', status: 'pending',  validators: ['Carlos Ruiz'],                 comments: 'BUY 14 M€ as pair trade with NOVN. FX hedge included.' },
+  { id: 'r3', standCode: 'NVDA',    standId: 's7',  fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'Nvidia Corp',                   requester: 'Pedro Martin', requesterRole: 'commercial', date: '2026-03-08', status: 'reserved', validators: ['Carlos Ruiz', 'Maria Garcia'], comments: 'TRIM 8 M€ on profit-taking. Filled at €871.20 average.' },
+  { id: 'r4', standCode: 'F28',     standId: 's26', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'Ford Motor Co 4.75% 2028',      requester: 'Ana Lopez',    requesterRole: 'commercial', date: '2026-03-07', status: 'pending',  validators: ['Carlos Ruiz'],                 comments: 'EXIT 9.6 M€ — credit deterioration, downgrade watch flagged by S&P.', risk: 'HY exposure above mandate cap' },
+  { id: 'r5', standCode: 'VWO',     standId: 's44', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'Vanguard FTSE EM ETF',          requester: 'Pedro Martin', requesterRole: 'commercial', date: '2026-03-06', status: 'available', validators: ['Carlos Ruiz'],                comments: 'BUY rejected — EM allocation cap (3.0%) breached when combined with IEMG.' },
+  { id: 'r6', standCode: 'TEF',     standId: 's16', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'Telefonica SA',                 requester: 'Ana Lopez',    requesterRole: 'commercial', date: '2026-03-05', status: 'pending',  validators: ['Carlos Ruiz'],                 comments: 'EXIT 15.6 M€ — counter-momentum, dividend coverage concern.',         risk: 'Counter-momentum, flagged by risk dashboard' },
+  { id: 'r7', standCode: 'IEMG',    standId: 's45', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'iShares Core MSCI EM',          requester: 'Pedro Martin', requesterRole: 'commercial', date: '2026-03-11', status: 'pending',  validators: [],                              comments: 'New EM rotation request — 8.4 M€. Awaiting compliance assignment.' },
+  { id: 'r8', standCode: 'JPM',     standId: 's23', fairId: 'f1', fairName: 'Master Multi-Asset Fund', company: 'JPMorgan Chase',                requester: 'Ana Lopez',    requesterRole: 'commercial', date: '2026-03-04', status: 'reserved', validators: ['Carlos Ruiz', 'Maria Garcia'], comments: 'BUY 30 M€ — financials overweight thesis. Filled at €195.10 average.' },
 ];
 
 export const activities: ActivityItem[] = [
-  { id: 'a1', user: 'Ana López', role: 'commercial', action: 'requested stand reservation for', target: 'P3-B01 for Meliá Hotels', date: '2026-03-10T14:30:00', type: 'reservation' },
-  { id: 'a2', user: 'Carlos Ruiz', role: 'architect', action: 'updated the plan for', target: 'FITUR 2026 (v2.4)', date: '2026-03-10T11:15:00', type: 'plan' },
-  { id: 'a3', user: 'María García', role: 'admin', action: 'approved reservation for', target: 'P3-C01 for Amadeus', date: '2026-03-09T16:00:00', type: 'approval' },
-  { id: 'a4', user: 'Pedro Martín', role: 'commercial', action: 'generated sales proposal for', target: 'P3-C05 – Barceló', date: '2026-03-11T08:45:00', type: 'reservation' },
-  { id: 'a5', user: 'Carlos Ruiz', role: 'architect', action: 'detected technical conflict in', target: 'P3-E01 – evacuation zone', date: '2026-03-09T09:20:00', type: 'conflict' },
-  { id: 'a6', user: 'María García', role: 'admin', action: 'added', target: 'Isabel Torres as architect for MWC 2026', date: '2026-03-08T15:00:00', type: 'user' },
-  { id: 'a7', user: 'Carlos Ruiz', role: 'architect', action: 'rejected request for', target: 'P3-D02 – Visit London due to regulations', date: '2026-03-07T12:30:00', type: 'approval' },
-  { id: 'a8', user: 'Ana López', role: 'commercial', action: 'requested dimension change in', target: 'P3-A03 for Turespaña', date: '2026-03-07T10:00:00', type: 'reservation' },
+  { id: 'a1', user: 'Ana Lopez',     role: 'commercial', action: 'submitted BUY order for',         target: 'NOVN — 16 M€ — Master Multi-Asset Fund',                date: '2026-03-10T14:30:00', type: 'reservation' },
+  { id: 'a2', user: 'Carlos Ruiz',   role: 'architect',  action: 'published Q1-2026 rebalance for', target: 'Master Multi-Asset Fund (87% invested, 6.5% dry-powder)', date: '2026-03-04T11:15:00', type: 'plan' },
+  { id: 'a3', user: 'Maria Garcia',  role: 'admin',      action: 'approved trade execution for',   target: 'JPM — 30 M€ filled at €195.10',                          date: '2026-03-04T16:00:00', type: 'approval' },
+  { id: 'a4', user: 'Pedro Martin',  role: 'commercial', action: 'opened EM rotation request for', target: 'IEMG — 8.4 M€ pending compliance',                       date: '2026-03-11T08:45:00', type: 'reservation' },
+  { id: 'a5', user: 'Carlos Ruiz',   role: 'architect',  action: 'flagged concentration breach in', target: 'Telefonica — counter-momentum + HY risk score',          date: '2026-03-09T09:20:00', type: 'conflict' },
+  { id: 'a6', user: 'Maria Garcia',  role: 'admin',      action: 'added',                          target: 'Isabel Torres as risk analyst on Sovereign & IG Credit',  date: '2026-03-08T15:00:00', type: 'user' },
+  { id: 'a7', user: 'Carlos Ruiz',   role: 'architect',  action: 'rejected order for',             target: 'VWO BUY 10.8 M€ — EM cap breach (3.6% > 3.0%)',           date: '2026-03-07T12:30:00', type: 'approval' },
+  { id: 'a8', user: 'Ana Lopez',     role: 'commercial', action: 'filed exit ticket for',          target: 'Ford 2028 HY — credit deterioration watch',               date: '2026-03-07T10:00:00', type: 'reservation' },
 ];
 
+// Position lifecycle (was stand state):
+//   available → "Closed" (position exited / slot empty)
+//   pending   → "Pending" (trade pending settlement)
+//   reserved  → "Active" (filled, in book)
 export const standStatusLabels: Record<StandStatus, string> = {
-  available: 'Available',
-  pending: 'Pending',
-  reserved: 'Reserved',
+  available: 'Closed',
+  pending:   'Pending',
+  reserved:  'Active',
 };
 
+// Trade-order lifecycle (was booking state):
 export const bookingStatusLabels: Record<BookingStatus, string> = {
-  available: 'Available',
-  pending: 'Pending',
-  reserved: 'Reserved',
+  available: 'Rejected',
+  pending:   'Pending',
+  reserved:  'Filled',
 };
 
 export const roleLabels: Record<UserRole, string> = {
-  admin: 'Administrator',
-  architect: 'Architect',
-  commercial: 'Commercial',
-  organizer: 'Organizer',
-  exhibitor: 'Exhibitor',
-  viewer: 'Viewer',
+  admin:      'Head of Investment',
+  architect:  'Risk Analyst',
+  commercial: 'Portfolio Manager',
+  organizer:  'Compliance',
+  exhibitor:  'Beneficiary',
+  viewer:     'Auditor',
 };
 
+// Portfolio lifecycle:
 export const fairStatusLabels: Record<FairStatus, string> = {
-  planificación: 'Planning',
-  comercialización: 'Sales',
-  en_curso: 'In progress',
-  finalizada: 'Completed',
+  planificación:    'Pre-launch',
+  comercialización: 'Subscriptions open',
+  en_curso:         'Live',
+  finalizada:       'Closed',
 };
 
+// Rebalance lifecycle:
 export const fairVersionStatusLabels: Record<FairVersionStatus, string> = {
-  draft: 'Draft tecnico',
-  published: 'Published',
-  commercial_draft: 'Commercial draft',
+  draft:            'Working draft',
+  published:        'Approved',
+  commercial_draft: 'Trading desk draft',
 };
 
 // ============ USER MANAGEMENT FUNCTIONS ============
@@ -483,7 +627,7 @@ export const addFair = (fairData: Omit<Fair, 'id' | 'currentVersionId' | 'lastAc
     updatedAt: now,
     rowVersion: 1,
     createdBy: fairData.responsible,
-    summary: 'Versión inicial de la feria',
+    summary: 'Initial portfolio construction',
     occupancySnapshot: 0,
     standsSnapshot: fairData.totalStands,
     pendingSnapshot: 0,
@@ -545,11 +689,11 @@ export const exhibitorAssignments: ExhibitorAssignment[] = [
   {
     userId: 'u5',
     fairId: 'f1',
-    companyName: 'Barceló Hotel Group',
+    companyName: 'Sanchez Family Office',
     primaryStandId: 's21',
     commercialContact: {
       name: 'Ana López',
-      email: 'ana@fairplan.com',
+      email: 'ana@flowspace.com',
       phone: '+34 600 123 456',
     },
   },
@@ -559,7 +703,7 @@ export const organizerAssignments: OrganizerAssignment[] = [
   {
     userId: 'u8',
     fairId: 'f1',
-    title: 'Organización general del evento',
+    title: 'Compliance oversight — Master Multi-Asset Fund',
   },
 ];
 
@@ -668,7 +812,7 @@ export const ensureCommercialDraftExists = (fairId: string): FairVersion | null 
     ...lastPublished,
     id: `v-${fairId}-cd-${versionIdCounter++}`,
     status: 'commercial_draft',
-    label: 'Draft comercial',
+    label: 'Trading desk draft',
     createdAt: now,
     updatedAt: now,
     rowVersion: 1,
@@ -912,7 +1056,7 @@ export const createArchitectDraftFromVersion = (
   actorName: string
 ): VersionMutationResult => {
   const fair = fairs.find(f => f.id === fairId);
-  if (!fair) return { ok: false, reason: 'Fair not found.' };
+  if (!fair) return { ok: false, reason: 'Portfolio not found.' };
 
   const source = fair.versions.find(v => v.id === sourceVersionId);
   if (!source) return { ok: false, reason: 'Source version not found.' };
@@ -951,7 +1095,7 @@ export const createArchitectDraftFromVersion = (
     ...source,
     id: `v-${fairId}-${versionIdCounter++}`,
     status: 'draft',
-    label: 'Draft tecnico',
+    label: 'Working draft',
     summary: `Working copy based on ${source.label}`,
     createdAt: now,
     updatedAt: now,
@@ -1134,7 +1278,7 @@ export const createBookingForStand = ({
     date: new Date().toISOString(),
     status,
     validators,
-    comments: comments || 'Nueva solicitud de reserva.',
+    comments: comments || 'New trade order — pending compliance review.',
   };
 
   bookings.push(newBooking);
@@ -1223,7 +1367,7 @@ export const fetchFloorPlanData = (fairId: string, options?: FloorPlanFetchOptio
     setTimeout(() => {
       const fair = fairs.find(f => f.id === fairId);
       if (!fair) {
-        return reject(new Error("Fair no encontrada"));
+        return reject(new Error("Portfolio not found"));
       }
 
       const sourceVersion = getWorkingVersionForRole(
@@ -1261,11 +1405,11 @@ export const requestBooking = (
       const stand = stands.find(s => s.id === standId);
 
       if (standIndex === -1 || !user || !stand) {
-        return reject(new Error("Stand, usuario o feria no encontrado."));
+        return reject(new Error("Position, user or portfolio not found."));
       }
 
       if (stands[standIndex].status !== 'available') {
-        return reject(new Error("El stand ya no está disponible."));
+        return reject(new Error("Position is no longer available."));
       }
 
       const createdBooking = createBookingForStand({
@@ -1274,13 +1418,13 @@ export const requestBooking = (
         standId: stands[standIndex].id,
         userId,
         company: options?.company,
-        comments: options?.comments || 'Nueva solicitud desde stands/plano.',
+        comments: options?.comments || 'New order ticket from positions / 3D map.',
         status: options?.status || 'pending',
         validators: options?.validators || [],
       });
 
       if (!createdBooking) {
-        return reject(new Error("El stand ya no está disponible para reservar."));
+        return reject(new Error("Position is no longer available to open."));
       }
       
       resolve(stands[standIndex]);
@@ -1293,7 +1437,7 @@ export const approveBooking = (standId: string): Promise<Stand> => {
     setTimeout(() => {
       const standIndex = stands.findIndex(s => s.id === standId);
       if (standIndex === -1) {
-        return reject(new Error("Stand no encontrado."));
+        return reject(new Error("Position not found."));
       }
 
       stands[standIndex].status = 'reserved';
@@ -1315,7 +1459,7 @@ export const rejectBooking = (standId: string): Promise<Stand> => {
     setTimeout(() => {
       const standIndex = stands.findIndex(s => s.id === standId);
       if (standIndex === -1) {
-        return reject(new Error("Stand no encontrado."));
+        return reject(new Error("Position not found."));
       }
 
       stands[standIndex].status = 'available';

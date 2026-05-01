@@ -23,7 +23,7 @@ export default function VenueDetail() {
   const venue = venues.find((item) => item.id === venueId);
 
   if (!venue) {
-    return <div className="py-20 text-center text-muted-foreground">Venue no encontrado</div>;
+    return <div className="py-20 text-center text-muted-foreground">Mandate not found.</div>;
   }
 
   const venueFairs = fairs.filter((fair) => fair.venueId === venue.id);
@@ -62,7 +62,7 @@ export default function VenueDetail() {
   const fairColumns = useMemo(() => [
     {
       key: "name",
-      label: "Fair",
+      label: "Portfolio",
       sortable: true,
       sortResolver: (f: Fair) => f.name,
       filterable: true,
@@ -90,7 +90,7 @@ export default function VenueDetail() {
     },
     {
       key: "owner",
-      label: "Owner",
+      label: "PM",
       sortable: true,
       sortResolver: (f: Fair) => f.responsible,
       filterable: true,
@@ -100,10 +100,10 @@ export default function VenueDetail() {
     },
     {
       key: "dates",
-      label: "Dates",
+      label: "Inception",
       sortable: true,
       sortResolver: (f: Fair) => f.startDate,
-      render: (fair: Fair) => `${new Date(fair.startDate).toLocaleDateString("es-ES")} - ${new Date(fair.endDate).toLocaleDateString("es-ES")}`,
+      render: (fair: Fair) => new Date(fair.startDate).toLocaleDateString("en-GB"),
     },
     {
       key: "action",
@@ -124,34 +124,34 @@ export default function VenueDetail() {
       <DashboardStatsSection
         cards={[
           {
-            id: "venue-location",
-            title: "VENUE\nlocation",
+            id: "mandate-hq",
+            title: "HQ",
             value: venue.location.split(",")[0] ?? venue.location,
             subtitle: venue.location,
           },
           {
-            id: "venue-area",
-            title: "TOTAL\narea",
-            value: `${Math.round(venue.area / 1000)}k`,
-            subtitle: `${venue.area.toLocaleString("es-ES")} m2`,
+            id: "mandate-aum",
+            title: "Mandate\nAUM",
+            value: `€${venue.area.toLocaleString("en-GB")} M`,
+            subtitle: "Capital under management",
           },
           {
-            id: "venue-pavilions",
-            title: "TOTAL\npavilions",
+            id: "mandate-strategies",
+            title: "Strategies",
             value: venue.pavilions,
-            subtitle: "Espacios activos",
+            subtitle: "Active sleeves",
           },
           {
-            id: "venue-fairs",
-            title: "LINKED\nfairs",
+            id: "mandate-portfolios",
+            title: "Portfolios",
             value: venueFairs.length,
-            subtitle: "Asociadas a este venue",
+            subtitle: "Within this mandate",
           },
           {
-            id: "venue-occupancy",
-            title: "AVERAGE\noccupancy",
+            id: "mandate-invested",
+            title: "Avg.\ninvested",
             value: `${Math.round(venueFairs.reduce((sum, fair) => sum + fair.occupancy, 0) / (venueFairs.length || 1))}%`,
-            subtitle: "Entre ferias del venue",
+            subtitle: "Across mandate portfolios",
           },
         ]}
       />
@@ -168,15 +168,15 @@ export default function VenueDetail() {
 
         <div className="h-full overflow-hidden lg:col-span-2">
           <RecentFairsTable
-            title={`Fairs in ${venue.name}`}
+            title={`Portfolios in ${venue.name}`}
             initialViewMode="list"
-            searchPlaceholder="Search fairs in venue"
-            searchAriaLabel="Buscar ferias del recinto"
+            searchPlaceholder="Search portfolios in mandate"
+            searchAriaLabel="Search portfolios in mandate"
             recentFairsSearch={recentFairsSearch}
             onRecentFairsSearchChange={setRecentFairsSearch}
             items={filteredVenueFairs}
             columns={fairColumns}
-            emptyMessage="No hay ferias en este recinto con ese criterio."
+            emptyMessage="No portfolios match the current filters."
             initialItemsPerPage={5}
           />
         </div>

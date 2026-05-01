@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(git ls-remote *)",
+      "Bash(git show-ref *)",
+      "Bash(git ls-tree *)",
+      "Bash(git fetch *)",
+      "Bash(npm run *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git -c user.email=sanchezespinosa1998@gmail.com -c user.name=sanchezespinosa1998 commit -q -m 'PortfolioMap · ultimate fintech web app *)",
+      "Bash(git push *)"
     ]
   }
 }

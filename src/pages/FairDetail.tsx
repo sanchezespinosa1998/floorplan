@@ -32,17 +32,17 @@ type FairDetailDatasetKey = "stands" | "bookings" | "users" | "versions";
 type FairDetailRow = Stand | Booking | User | FairVersion;
 
 const DATASET_OPTIONS: Array<{ key: FairDetailDatasetKey; label: string }> = [
-  { key: "stands", label: "Stands" },
-  { key: "bookings", label: "Bookings" },
-  { key: "users", label: "Users" },
-  { key: "versions", label: "Versions" },
+  { key: "stands",   label: "Holdings" },
+  { key: "bookings", label: "Trade orders" },
+  { key: "users",    label: "Team" },
+  { key: "versions", label: "Rebalances" },
 ];
 
 const SEARCH_CONFIG: Record<FairDetailDatasetKey, { placeholder: string; ariaLabel: string; empty: string }> = {
-  stands: { placeholder: "Search stands", ariaLabel: "Buscar stands", empty: "No hay stands que coincidan con la búsqueda." },
-  bookings: { placeholder: "Search bookings", ariaLabel: "Buscar bookings", empty: "No hay bookings que coincidan con la búsqueda." },
-  users: { placeholder: "Search users", ariaLabel: "Buscar usuarios", empty: "No hay usuarios vinculados a esta feria." },
-  versions: { placeholder: "Search versions", ariaLabel: "Buscar versiones", empty: "No hay versiones que coincidan con la búsqueda." },
+  stands:   { placeholder: "Search holdings",     ariaLabel: "Search holdings",     empty: "No holdings match the current filters." },
+  bookings: { placeholder: "Search trade orders", ariaLabel: "Search trade orders", empty: "No trade orders match the current filters." },
+  users:    { placeholder: "Search team",         ariaLabel: "Search team",         empty: "No team members assigned to this portfolio." },
+  versions: { placeholder: "Search rebalances",   ariaLabel: "Search rebalances",   empty: "No rebalances match the current filters." },
 };
 
 export default function FairDetail() {
@@ -130,7 +130,7 @@ export default function FairDetail() {
   const standsColumns = useMemo<RecentTableColumn<Stand>[]>(() => [
     {
       key: "stand",
-      label: "Stand",
+      label: "Ticker",
       sortable: true,
       sortResolver: (s: Stand) => s.code,
       filterable: true,
@@ -139,13 +139,13 @@ export default function FairDetail() {
       render: (stand: Stand) => (
         <div className="py-[8px]">
           <p className="text-[12.8px] font-bold text-[#dadada]">{stand.code}</p>
-          <p className="text-[10.24px] font-light leading-[1.56] text-[#dadada]">Zona {stand.zone}</p>
+          <p className="text-[10.24px] font-light leading-[1.56] text-[#dadada]">{stand.company ?? stand.zone}</p>
         </div>
       ),
     },
     {
       key: "type",
-      label: "Type",
+      label: "Asset class",
       sortable: true,
       sortResolver: (s: Stand) => s.type,
       filterable: true,
@@ -168,10 +168,10 @@ export default function FairDetail() {
     },
     {
       key: "area",
-      label: "Area",
+      label: "Exposure",
       sortable: true,
       sortResolver: (s: Stand) => s.area,
-      render: (stand: Stand) => `${stand.area} m2`,
+      render: (stand: Stand) => `€${stand.area.toLocaleString("en-GB")} M`,
     },
     {
       key: "action",
@@ -181,7 +181,7 @@ export default function FairDetail() {
           to={`/fairs/${fairId ?? ""}/plan`}
           className="ui-hover-surface ui-interactive-base inline-flex h-[31.25px] items-center justify-center rounded-[6.55px] border border-[#333333] bg-[#141414] px-[12.8px] py-[8.19px] text-[12.8px] font-extrabold text-[#fafafa]"
         >
-          Open 3D
+          3D map
         </Link>
       ),
     },
@@ -190,7 +190,7 @@ export default function FairDetail() {
   const bookingColumns = useMemo<RecentTableColumn<Booking>[]>(() => [
     {
       key: "booking",
-      label: "Booking",
+      label: "Order",
       sortable: true,
       sortResolver: (b: Booking) => b.standCode,
       filterable: true,
@@ -218,7 +218,7 @@ export default function FairDetail() {
     },
     {
       key: "owner",
-      label: "Owner",
+      label: "Submitted by",
       sortable: true,
       sortResolver: (b: Booking) => b.requester,
       filterable: true,
@@ -276,7 +276,7 @@ export default function FairDetail() {
     },
     {
       key: "company",
-      label: "Company",
+      label: "Firm",
       sortable: true,
       sortResolver: (u: User) => u.company ?? "",
       filterable: true,
@@ -301,7 +301,7 @@ export default function FairDetail() {
   const versionColumns = useMemo<RecentTableColumn<FairVersion>[]>(() => [
     {
       key: "version",
-      label: "Version",
+      label: "Rebalance",
       sortable: true,
       sortResolver: (v: FairVersion) => v.label,
       filterable: true,
@@ -331,7 +331,7 @@ export default function FairDetail() {
     },
     {
       key: "owner",
-      label: "Owner",
+      label: "Author",
       sortable: true,
       sortResolver: (v: FairVersion) => v.updatedBy ?? v.createdBy,
       filterable: true,
@@ -373,7 +373,7 @@ export default function FairDetail() {
   const pendingStands = fairStands.filter((s) => s.status === "pending").length;
 
   if (!fair) {
-    return <div className="py-20 text-center text-muted-foreground">Fair not found</div>;
+    return <div className="py-20 text-center text-muted-foreground">Portfolio not found.</div>;
   }
 
   if (!isRoot) {
@@ -385,34 +385,34 @@ export default function FairDetail() {
       <DashboardStatsSection
         cards={[
           {
-            id: "fair-name",
-            title: "FAIR\nname",
+            id: "portfolio-name",
+            title: "Portfolio",
             value: fair.name,
-            subtitle: `Edition ${fair.edition}`,
+            subtitle: fair.edition,
           },
           {
-            id: "fair-occupancy",
-            title: "AVERAGE\noccupancy",
+            id: "portfolio-invested",
+            title: "Invested",
             value: `${fair.occupancy}%`,
-            subtitle: "Ocupacion actual",
+            subtitle: "Capital deployed",
           },
           {
-            id: "fair-total-stands",
-            title: "TOTAL\nstands",
+            id: "portfolio-total-positions",
+            title: "Holdings",
             value: fair.totalStands,
-            subtitle: "Estructura configurada",
+            subtitle: "Configured slots",
           },
           {
-            id: "fair-free-stands",
-            title: "FREE\nstands",
+            id: "portfolio-dry-powder",
+            title: "Dry-powder",
             value: fair.freeStands,
-            subtitle: "Disponibles para reservar",
+            subtitle: "Slots ready to deploy",
           },
           {
-            id: "fair-pending-stands",
-            title: "PENDING\nstands",
+            id: "portfolio-pending",
+            title: "Pending",
             value: pendingStands,
-            subtitle: "En validacion",
+            subtitle: "Trades in compliance",
           },
         ]}
       />

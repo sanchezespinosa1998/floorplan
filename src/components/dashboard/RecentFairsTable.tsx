@@ -133,7 +133,7 @@ export function RecentFairsTable<T extends { id: string }>({
                 className="inline-flex items-center gap-1 rounded-[6.55px] border border-[#333333] bg-[#1a1a1a] px-2 py-1 text-[10.5px] font-medium text-[#9a9a9a] transition-colors hover:text-[#fafafa]"
               >
                 <X className="h-3 w-3" />
-                Clear filters ({activeCount})
+                Limpiar filtros ({activeCount})
               </button>
             )}
 
@@ -152,7 +152,7 @@ export function RecentFairsTable<T extends { id: string }>({
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                aria-label="Ver en lista"
+                aria-label="List view"
                 className={viewMode === "list"
                   ? "inline-flex h-[31px] w-[40px] items-center justify-center bg-[#8fee00] text-[#0a0a0a]"
                   : "ui-hover-surface ui-interactive-base inline-flex h-[31px] w-[40px] items-center justify-center bg-[#141414] text-[#fafafa]"
@@ -163,7 +163,7 @@ export function RecentFairsTable<T extends { id: string }>({
               <button
                 type="button"
                 onClick={() => setViewMode("cards")}
-                aria-label="Ver en cuadrados"
+                aria-label="Card view"
                 className={viewMode === "cards"
                   ? "inline-flex h-[31px] w-[40px] items-center justify-center bg-[#8fee00] text-[#0a0a0a]"
                   : "ui-hover-surface ui-interactive-base inline-flex h-[31px] w-[40px] items-center justify-center bg-[#141414] text-[#fafafa]"
@@ -290,7 +290,7 @@ export function RecentFairsTable<T extends { id: string }>({
                                       onClick={() => clearFilter(column.key)}
                                       className="mt-1.5 text-left text-[10px] text-[#555555] hover:text-[#9a9a9a]"
                                     >
-                                      Clear
+                                      Limpiar
                                     </button>
                                   )}
                                 </div>
@@ -306,7 +306,7 @@ export function RecentFairsTable<T extends { id: string }>({
                                       if (!e.target.value) clearFilter(column.key);
                                       else setFilter(column.key, { mode: "text", values: [e.target.value] });
                                     }}
-                                    placeholder="Filter…"
+                                    placeholder="Filtrar…"
                                     className="h-[26px] w-full bg-transparent text-[11px] text-[#dadada] outline-none placeholder:text-[#444444]"
                                   />
                                   {(filters[column.key]?.values[0]?.length ?? 0) > 0 && (
@@ -418,7 +418,7 @@ export function RecentFairsTable<T extends { id: string }>({
       {/* Pagination footer */}
       <div className="mt-auto flex flex-col gap-4 border-t border-[#333333] bg-[#0a0a0a] px-[12.8px] py-[12.8px] lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3 text-[14px] text-[#fafafa]">
-          <span>Filas por página</span>
+          <span>Rows per page</span>
           <select
             value={itemsPerPage}
             onChange={(event) => setItemsPerPage(Number(event.target.value))}
@@ -441,7 +441,7 @@ export function RecentFairsTable<T extends { id: string }>({
             type="button"
             onClick={prevPage}
             disabled={currentPage === 1}
-            aria-label="Página anterior"
+            aria-label="Previous page"
             className="ui-hover-surface ui-interactive-base inline-flex h-[31px] w-[40px] items-center justify-center rounded-[8.19px] border border-[#333333] bg-[#141414] text-[#fafafa] disabled:opacity-50"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -465,7 +465,7 @@ export function RecentFairsTable<T extends { id: string }>({
             type="button"
             onClick={nextPage}
             disabled={currentPage === totalPages}
-            aria-label="Página siguiente"
+            aria-label="Next page"
             className="ui-hover-surface ui-interactive-base inline-flex h-[31px] w-[40px] items-center justify-center rounded-[8.19px] border border-[#333333] bg-[#141414] text-[#fafafa] disabled:opacity-50"
           >
             <ChevronRight className="h-4 w-4" />

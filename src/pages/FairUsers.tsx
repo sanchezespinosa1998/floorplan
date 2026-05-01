@@ -229,9 +229,9 @@ export default function FairUsers() {
   if (!fairId || !canAccessFair(fairId)) {
     return (
       <div className="space-y-4 animate-fade-in">
-        <p className="text-sm text-muted-foreground">You do not have access to users of this fair.</p>
+        <p className="text-sm text-muted-foreground">You don't have access to the team of this portfolio.</p>
         <Link to="/fairs" className="flex items-center gap-2 text-primary hover:underline">
-          <ArrowRight className="h-4 w-4 rotate-180" /> Back to fairs
+          <ArrowRight className="h-4 w-4 rotate-180" /> Back to portfolios
         </Link>
       </div>
     );
@@ -245,13 +245,13 @@ export default function FairUsers() {
         transition={{ duration: 0.3 }}
         className="flex items-center justify-between"
       >
-        <p className="text-sm text-muted-foreground">{filteredFairUsers.length} users linked to this fair</p>
+        <p className="text-sm text-muted-foreground">{filteredFairUsers.length} team members assigned to this portfolio</p>
         {canManageUsers && (
           <button 
             className="flex items-center gap-2 min-h-[44px] px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
             onClick={() => setIsAddUsersDialogOpen(true)}
           >
-            <UserPlus className="h-4 w-4" /> Add users
+            <UserPlus className="h-4 w-4" /> Add members
           </button>
         )}
       </motion.div>
@@ -264,7 +264,7 @@ export default function FairUsers() {
             <tr className="border-b border-border bg-muted/50">
               {[
                 { label: 'User',    key: 'name',    mode: 'text' as const, opts: undefined,               lbls: undefined },
-                { label: 'Company', key: 'company', mode: 'text' as const, opts: undefined,               lbls: undefined },
+                { label: 'Firm',    key: 'company', mode: 'text' as const, opts: undefined,               lbls: undefined },
                 { label: 'Email',   key: 'email',   mode: 'text' as const, opts: undefined,               lbls: undefined },
                 { label: 'Role',    key: 'role',    mode: 'enum' as const, opts: Object.keys(roleLabels), lbls: roleLabels as Record<string,string> },
               ].map(col => (
@@ -340,7 +340,7 @@ export default function FairUsers() {
             {filteredFairUsers.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No users found with selected filters.
+                  No team members match the current filters.
                 </td>
               </tr>
             )}
@@ -353,7 +353,7 @@ export default function FairUsers() {
       <div className="md:hidden space-y-3">
         {filteredFairUsers.length === 0 ? (
           <div className="bg-card border border-border p-8 text-center text-muted-foreground text-sm">
-            No users found with selected filters.
+            No team members match the current filters.
           </div>
         ) : (
           filteredFairUsers.map((u, index) => {

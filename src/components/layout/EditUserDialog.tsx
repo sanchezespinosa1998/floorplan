@@ -63,25 +63,25 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
 
   const validateForm = () => {
     if (!name.trim()) {
-      setError("Name is required");
+      setError("El nombre es obligatorio");
       return false;
     }
     if (!email.trim()) {
-      setError("Email is required");
+      setError("El email es obligatorio");
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address");
+      setError("Introduce un email válido");
       return false;
     }
     if (password || confirmPassword) {
       if (password.length < 6) {
-        setError("Password must be at least 6 characters");
+        setError("La contraseña debe tener al menos 6 caracteres");
         return false;
       }
       if (password !== confirmPassword) {
-        setError("Passwords do not match");
+        setError("Las contraseñas no coinciden");
         return false;
       }
     }
@@ -106,10 +106,10 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
         password: password || undefined,
       });
       
-      toast.success(`User "${name}" updated successfully`);
+      toast.success(`Usuario "${name}" actualizado`);
       handleOpenChange(false);
     } catch (err) {
-      toast.error("Failed to update user");
+      toast.error("No se pudo actualizar el usuario");
     } finally {
       setLoading(false);
     }
@@ -123,22 +123,22 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <UserIcon className="h-5 w-5 text-primary" />
             </div>
-            Edit user
+            Editar usuario
           </DialogTitle>
           <DialogDescription>
-            Update user information, role, and password
+            Actualiza la información del usuario, su rol y contraseña
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="editName">Full name</Label>
+            <Label htmlFor="editName">Nombre completo</Label>
             <div className="relative">
               <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="editName"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Ana López"
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
@@ -150,13 +150,13 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="editEmail">Email address</Label>
+            <Label htmlFor="editEmail">Correo electrónico</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="editEmail"
                 type="email"
-                placeholder="john@example.com"
+                placeholder="ana@flowspace.com"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -168,12 +168,12 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="editRole">Role</Label>
+            <Label htmlFor="editRole">Rol</Label>
             <div className="relative">
               <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
                 <SelectTrigger className="pl-10">
-                  <SelectValue placeholder="Select role" />
+                  <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
                 <SelectContent>
                   {roleOptions.map((r) => (
@@ -187,10 +187,10 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
           </div>
 
           <div className="pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-3">Change password (leave empty to keep current)</p>
-            
+            <p className="text-xs text-muted-foreground mb-3">Cambiar contraseña (deja vacío para mantener la actual)</p>
+
             <div className="space-y-2">
-              <Label htmlFor="editPassword">New password</Label>
+              <Label htmlFor="editPassword">Nueva contraseña</Label>
               <div className="relative">
                 <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -208,7 +208,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
             </div>
 
             <div className="space-y-2 mt-2">
-              <Label htmlFor="editConfirmPassword">Confirm new password</Label>
+              <Label htmlFor="editConfirmPassword">Confirmar nueva contraseña</Label>
               <div className="relative">
                 <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -233,11 +233,11 @@ export function EditUserDialog({ open, onOpenChange, user, onSave }: EditUserDia
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={loading}>
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
               <Save className="h-4 w-4 mr-2" />
-              {loading ? "Saving..." : "Save changes"}
+              {loading ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>
         </form>

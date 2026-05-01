@@ -59,10 +59,10 @@ export function AdminPanel({ children }: AdminPanelProps) {
   };
 
   const handleDeleteFair = (fair: Fair) => {
-    if (confirm(`¿Estás seguro de eliminar la feria "${fair.name}"?`)) {
+    if (confirm(`Are you sure you want to delete portfolio "${fair.name}"?`)) {
       deleteFair(fair.id);
       setFairsList([...fairs]);
-      toast.success(`Fair "${fair.name}" eliminada`);
+      toast.success(`Portfolio "${fair.name}" deleted`);
     }
   };
 
@@ -71,7 +71,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
     setEditingUser(null);
   };
 
-  const getVenueName = (venueId: string) => venues.find(v => v.id === venueId)?.name || "Sin recinto";
+  const getVenueName = (venueId: string) => venues.find(v => v.id === venueId)?.name || "No mandate";
 
   return (
     <>
@@ -79,18 +79,18 @@ export function AdminPanel({ children }: AdminPanelProps) {
         <DialogTrigger asChild>
           {children}
         </DialogTrigger>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-5xl max-h-[90dvh] w-[calc(100vw-1rem)] sm:w-full overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-xl">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Settings className="h-5 w-5 text-primary" />
               </div>
-              Panel de Administration
+              Admin panel
             </DialogTitle>
           </DialogHeader>
 
           {/* Tabs */}
-          <div className="flex gap-2 py-2 border-b border-border">
+          <div className="flex flex-wrap gap-2 py-2 border-b border-border overflow-x-auto">
             <Button
               variant={activeTab === "usuarios" ? "default" : "ghost"}
               size="sm"
@@ -107,7 +107,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
               className="gap-2"
             >
               <CalendarDays className="h-4 w-4" />
-              Fairs
+              Portfolios
             </Button>
             {isAdmin && (
               <>
@@ -127,7 +127,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                   className="gap-2"
                 >
                   <Gauge className="h-4 w-4" />
-                  Sistema
+                  System
                 </Button>
               </>
             )}
@@ -138,7 +138,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
             {activeTab === "usuarios" && (
               <div className="space-y-4">
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                   <div className="bg-muted/30 rounded-lg p-4 border border-border">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
@@ -157,7 +157,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{usersList.filter(u => u.role === 'architect').length}</p>
-                        <p className="text-xs text-muted-foreground">Arquitectos</p>
+                        <p className="text-xs text-muted-foreground">Risk analysts</p>
                       </div>
                     </div>
                   </div>
@@ -168,7 +168,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{usersList.filter(u => u.role === 'commercial').length}</p>
-                        <p className="text-xs text-muted-foreground">Comerciales</p>
+                        <p className="text-xs text-muted-foreground">Portfolio managers</p>
                       </div>
                     </div>
                   </div>
@@ -191,9 +191,9 @@ export function AdminPanel({ children }: AdminPanelProps) {
                     <div>
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <Users className="h-5 w-5" />
-                        Management de Users
+                        Gestión de usuarios
                       </h3>
-                      <p className="text-sm text-muted-foreground">Administra los usuarios del sistema y sus roles</p>
+                      <p className="text-sm text-muted-foreground">Manage users and roles across the firm</p>
                     </div>
                     <Button 
                       size="sm" 
@@ -270,7 +270,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
             {activeTab === "ferias" && (
               <div className="space-y-4">
                 {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                   <div className="bg-muted/30 rounded-lg p-4 border border-border">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
@@ -278,7 +278,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{fairsList.length}</p>
-                        <p className="text-xs text-muted-foreground">Fairs</p>
+                        <p className="text-xs text-muted-foreground">Portfolios</p>
                       </div>
                     </div>
                   </div>
@@ -289,7 +289,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{fairsList.filter(f => f.status === 'en_curso').length}</p>
-                        <p className="text-xs text-muted-foreground">En curso</p>
+                        <p className="text-xs text-muted-foreground">Live</p>
                       </div>
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{venues.length}</p>
-                        <p className="text-xs text-muted-foreground">Venues</p>
+                        <p className="text-xs text-muted-foreground">Mandates</p>
                       </div>
                     </div>
                   </div>
@@ -323,9 +323,9 @@ export function AdminPanel({ children }: AdminPanelProps) {
                     <div>
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <CalendarDays className="h-5 w-5" />
-                        Management de Fairs
+                        Portfolio management
                       </h3>
-                      <p className="text-sm text-muted-foreground">Administra las ferias del sistema</p>
+                      <p className="text-sm text-muted-foreground">Manage portfolios across all mandates</p>
                     </div>
                   </div>
                   
@@ -355,9 +355,9 @@ export function AdminPanel({ children }: AdminPanelProps) {
                               fair.status === "finalizada" && "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
                               fair.status === "planificación" && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                             )}>
-                            {fair.status === "en_curso" ? "En curso" : 
-                             fair.status === "comercialización" ? "Sales" :
-                             fair.status === "finalizada" ? "Finalizada" : "Planning"}
+                            {fair.status === "en_curso" ? "Live" :
+                             fair.status === "comercialización" ? "Subscriptions open" :
+                             fair.status === "finalizada" ? "Closed" : "Pre-launch"}
                           </Badge>
                           
                           <Button 
@@ -382,9 +382,9 @@ export function AdminPanel({ children }: AdminPanelProps) {
                 <div className="px-6 py-4 border-b border-border">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <Shield className="h-5 w-5" />
-                    Roles and Permissions
+                    Roles & permissions
                   </h3>
-                  <p className="text-sm text-muted-foreground">System roles and permissions configuration</p>
+                  <p className="text-sm text-muted-foreground">Role-based access control across the firm</p>
                 </div>
                 
                 <div className="divide-y divide-border">
@@ -406,11 +406,12 @@ export function AdminPanel({ children }: AdminPanelProps) {
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {role === "admin" && "Full access to all system functionalities. User management, configuration and all operations."}
-                        {role === "architect" && "Creation and editing of projects, plans, versions and technical project management."}
-                        {role === "commercial" && "Booking management, customer service and commercial tracking."}
-                        {role === "exhibitor" && "Limited access to the exhibitor portal with information about their assigned stand."}
-                        {role === "viewer" && "Only viewing of projects, fairs and plans without editing capability."}
+                        {role === "admin" && "Full firm access. User management, configuration, mandates and limit changes."}
+                        {role === "architect" && "Risk and mandate construction. Edit allocations, draft rebalances, set risk limits."}
+                        {role === "commercial" && "Trade execution, order routing, P&L attribution and client coverage."}
+                        {role === "organizer" && "Compliance and audit. Pre-trade checks, regulatory reporting, oversight."}
+                        {role === "exhibitor" && "Read-only beneficiary portal with their portfolio statement and key dates."}
+                        {role === "viewer" && "External auditor access. Read-only across mandates with no edit rights."}
                       </p>
                     </div>
                   ))}
@@ -424,9 +425,9 @@ export function AdminPanel({ children }: AdminPanelProps) {
                 <div className="px-6 py-4 border-b border-border">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
                     <Gauge className="h-5 w-5" />
-                    System Configuration
+                    System configuration
                   </h3>
-                  <p className="text-sm text-muted-foreground">Global configuration options</p>
+                  <p className="text-sm text-muted-foreground">Opciones de configuración global</p>
                 </div>
                 
                 <div className="p-6 grid grid-cols-2 gap-6">
@@ -434,7 +435,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                     <h4 className="font-medium text-sm">General</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between py-2 border-b border-border">
-                        <span className="text-muted-foreground">Application version</span>
+                        <span className="text-muted-foreground">App version</span>
                         <span className="font-medium">1.0.0</span>
                       </div>
                       <div className="flex justify-between py-2 border-b border-border">
@@ -443,7 +444,7 @@ export function AdminPanel({ children }: AdminPanelProps) {
                       </div>
                       <div className="flex justify-between py-2 border-b border-border">
                         <span className="text-muted-foreground">Modules</span>
-                        <span className="font-medium">Active modules</span>
+                        <span className="font-medium">All modules active</span>
                       </div>
                     </div>
                   </div>

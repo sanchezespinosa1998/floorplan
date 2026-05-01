@@ -59,13 +59,13 @@ export function DashboardInfoTable({
     <section className="mb-5 flex h-full min-h-0 flex-col overflow-hidden rounded-[8.19px] border border-[#333333] shadow-[0_4px_7.525px_rgba(0,0,0,0.75)] ">
       <div className="flex flex-col gap-4 bg-[#0a0a0a] px-4 py-4 border-b border-[#333333]">
         <div className="flex items-center justify-between gap-[10.24px] ">
-          <h2 className="text-[16px] font-bold leading-none text-[#dadada]">Información de la tabla</h2>
+          <h2 className="text-[16px] font-bold leading-none text-[#dadada]">Recent activity</h2>
 
           <div className="flex items-center overflow-hidden rounded-[8.19px] border border-[#333333]">
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              aria-label="Ver en lista"
+              aria-label="List view"
               className={viewMode === "list"
                 ? "inline-flex h-[31px] w-[40px] items-center justify-center bg-[#8fee00] text-[#0a0a0a]"
                 : "ui-hover-surface ui-interactive-base inline-flex h-[31px] w-[40px] items-center justify-center bg-[#141414] text-[#fafafa]"
@@ -76,7 +76,7 @@ export function DashboardInfoTable({
             <button
               type="button"
               onClick={() => setViewMode("cards")}
-              aria-label="Ver en cuadrados"
+              aria-label="Card view"
               className={viewMode === "cards"
                 ? "inline-flex h-[31px] w-[40px] items-center justify-center bg-[#8fee00] text-[#0a0a0a]"
                 : "ui-hover-surface ui-interactive-base inline-flex h-[31px] w-[40px] items-center justify-center bg-[#141414] text-[#fafafa]"
@@ -95,8 +95,8 @@ export function DashboardInfoTable({
             type="text"
             value={recentActivitySearch}
             onChange={(event) => onRecentActivitySearchChange(event.target.value)}
-            placeholder="Search"
-            aria-label="Buscar actividad reciente"
+            placeholder="Buscar"
+            aria-label="Search recent activity"
             className="w-full bg-transparent text-[12.8px] font-extralight text-[#dadada] outline-none placeholder:text-[#dadada]"
           />
         </label>
@@ -139,7 +139,7 @@ export function DashboardInfoTable({
 
           {visibleActivities.length === 0 && (
             <div className="px-[25px] py-10 text-center text-[12.8px] font-extralight text-[#dadada]">
-              No hay actividad reciente que coincida con la búsqueda.
+              No recent activity matches the search.
             </div>
           )}
         </div>
@@ -147,7 +147,7 @@ export function DashboardInfoTable({
         <div className="flex-1 overflow-y-auto bg-[#141414] p-4">
           {visibleActivities.length === 0 ? (
             <div className="py-10 text-center text-[12.8px] font-extralight text-[#dadada]">
-              No hay actividad reciente que coincida con la búsqueda.
+              No recent activity matches the search.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

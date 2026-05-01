@@ -66,7 +66,7 @@ type FairVersion = ReturnType<typeof getFairVersions>[number];
 type VersionStatusFilter = "all" | "draft" | "published" | "commercial_draft";
 
 function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  return new Date(dateString).toLocaleDateString("es-ES", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -177,9 +177,9 @@ export default function FairVersions() {
   if (!fair) {
     return (
       <div className="space-y-6">
-        <div className="text-center py-12 text-muted-foreground">Fair not found</div>
+        <div className="text-center py-12 text-muted-foreground">Portfolio not found.</div>
         <Link to="/fairs" className="flex items-center gap-2 text-primary hover:underline">
-          <ArrowRight className="h-4 w-4 rotate-180" /> Back to fairs
+          <ArrowRight className="h-4 w-4 rotate-180" /> Back to portfolios
         </Link>
       </div>
     );
@@ -193,14 +193,14 @@ export default function FairVersions() {
     if (result.ok && result.version) {
       setPublishConflict(null);
       setIsPublishDialogOpen(false);
-      toast.success(`Version ${result.version.label} published successfully.`);
+      toast.success(`Rebalance ${result.version.label} approved and published.`);
       setRefreshTick((prev) => prev + 1);
     } else if (result.conflict) {
-      setPublishConflict("Draft changed before publish. Refresh and compare before trying again.");
+      setPublishConflict("Draft changed before approval. Reload and compare before retrying.");
       toast.error("Publish conflict detected.");
       setRefreshTick((prev) => prev + 1);
     } else {
-      toast.error(result.reason || "Could not publish the version.");
+      toast.error(result.reason || "Could not approve the rebalance.");
     }
   };
 
@@ -212,17 +212,17 @@ export default function FairVersions() {
     if (!fairId) return;
     const result = createArchitectDraftFromVersion(fairId, versionId, activeUser.name);
     if (result.ok && result.version) {
-      toast.success(`Draft updated from ${result.version.basedOnVersionId || "selected version"}.`);
+      toast.success(`Draft refreshed from ${result.version.basedOnVersionId || "selected rebalance"}.`);
       setRefreshTick((prev) => prev + 1);
       return;
     }
-    toast.error(result.reason || "Could not update draft.");
+    toast.error(result.reason || "Could not refresh the working draft.");
   };
 
   const handleCompareWithActive = (versionId: string) => {
     const right = activePublished?.id || draft?.id;
     if (!right) {
-      toast.error("No active reference version available to compare.");
+      toast.error("No hay versión de referencia activa para comparar.");
       return;
     }
     setCompareLeftId(versionId);
@@ -238,22 +238,22 @@ export default function FairVersions() {
         transition={{ duration: 0.3 }}
         className="space-y-2"
       >
-        <h2 className="text-lg font-semibold text-foreground">Versions of {fair.name} {fair.edition}</h2>
-        <p className="text-sm text-muted-foreground">Version history and release workflow for this fair plan</p>
+        <h2 className="text-lg font-semibold text-foreground">Rebalances · {fair.name} {fair.edition}</h2>
+        <p className="text-sm text-muted-foreground">Working drafts, approved snapshots, and rebalance history for this portfolio.</p>
       </motion.div>
 
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border border-border rounded-lg p-3">
         <div className="grid gap-3 md:grid-cols-5">
           <div className="text-sm">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Active published</p>
-            <p className="font-medium text-foreground">{activePublished?.label || "None"}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Active snapshot</p>
+            <p className="font-medium text-foreground">{activePublished?.label || "Ninguna"}</p>
           </div>
           <div className="text-sm">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Draft base</p>
-            <p className="font-medium text-foreground">{baseVersion?.label || "None"}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Base snapshot</p>
+            <p className="font-medium text-foreground">{baseVersion?.label || "Ninguna"}</p>
           </div>
           <div className="text-sm">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Draft status</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Draft state</p>
             <p className="font-medium text-foreground">{draft ? `Updated ${formatDate(draft.updatedAt || draft.createdAt)}` : "No active draft"}</p>
           </div>
           <div className="text-sm">
@@ -262,10 +262,10 @@ export default function FairVersions() {
           </div>
           <div className="text-sm flex items-end justify-start md:justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => setRefreshTick((prev) => prev + 1)} className="gap-1.5">
-              <RefreshCw className="h-4 w-4" /> Refresh
+              <RefreshCw className="h-4 w-4" /> Reload
             </Button>
             <Button size="sm" onClick={handleEditChanges} className="gap-1.5">
-              <Map className="h-4 w-4" /> Open 3D viewer
+              <Map className="h-4 w-4" /> Open 3D map
             </Button>
           </div>
         </div>
@@ -283,7 +283,7 @@ export default function FairVersions() {
       <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Published versions</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Approved rebalances</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -295,14 +295,14 @@ export default function FairVersions() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Draft workspace</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Working draft</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <PenLine className="h-5 w-5 text-amber-500" />
               <div className="text-2xl font-bold text-amber-500">{draft ? 1 : 0}</div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Editable technical copy</p>
+            <p className="text-xs text-muted-foreground mt-1">Copia técnica editable</p>
           </CardContent>
         </Card>
       </div>
@@ -315,17 +315,17 @@ export default function FairVersions() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">1</div>
-            <span className="text-muted-foreground">Published version (read-only)</span>
+            <span className="text-muted-foreground">Approved rebalance (read-only)</span>
           </div>
           <ArrowRight className="h-4 w-4 rotate-90 sm:rotate-0 text-muted-foreground/50" />
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">2</div>
-            <span className="text-amber-500 font-medium">Draft (editable copy)</span>
+            <span className="text-amber-500 font-medium">Working draft (editable)</span>
           </div>
           <ArrowRight className="h-4 w-4 rotate-90 sm:rotate-0 text-muted-foreground/50" />
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">3</div>
-            <span className="text-primary font-medium">Publish -&gt; New official version</span>
+            <span className="text-primary font-medium">Approve → New official rebalance</span>
           </div>
         </div>
       </div>
@@ -336,16 +336,16 @@ export default function FairVersions() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2">
                 <PenLine className="h-5 w-5 text-amber-500" />
-                <CardTitle className="text-base">Your workspace</CardTitle>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">Editable copy</span>
+                <CardTitle className="text-base">Your working draft</CardTitle>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">Copia editable</span>
               </div>
               {canManageVersions && (
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={handleEditChanges} className="gap-1.5 text-primary border-primary/40 hover:bg-primary/10">
-                    <Pencil className="h-4 w-4" /> Edit changes
+                    <Pencil className="h-4 w-4" /> Edit allocations
                   </Button>
                   <Button size="sm" onClick={() => setIsPublishDialogOpen(true)} className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <Globe className="h-4 w-4" /> Publish as new version
+                    <Globe className="h-4 w-4" /> Approve rebalance
                   </Button>
                 </div>
               )}
@@ -356,15 +356,15 @@ export default function FairVersions() {
               <div className="flex items-start gap-2">
                 <Info className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-amber-500/90">
-                  This draft is based on <strong className="text-foreground">{baseVersion?.label || "published"}</strong>. Changes here are isolated until publish.
+                  This draft is based on <strong className="text-foreground">{baseVersion?.label || "the active snapshot"}</strong>. Changes stay isolated until approved.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Last updated: {formatDate(draft.updatedAt || draft.createdAt)}</span>
-              <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Author: {draft.createdBy}</span>
-              <span className="flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Row version: {draft.rowVersion || 1}</span>
+              <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> Autor: {draft.createdBy}</span>
+              <span className="flex items-center gap-1.5"><GitBranch className="h-3.5 w-3.5" /> Versión de fila: {draft.rowVersion || 1}</span>
             </div>
             <p className="text-sm text-foreground">{draft.summary}</p>
           </CardContent>
@@ -372,7 +372,7 @@ export default function FairVersions() {
       ) : (
         <Card className="border-dashed border-muted-foreground/30">
           <CardContent className="py-6 text-center text-sm text-muted-foreground">
-            There is no active technical draft. Use any published version row action to create one.
+            No active draft. Use the row action on any approved rebalance to fork a working draft.
           </CardContent>
         </Card>
       )}
@@ -381,13 +381,13 @@ export default function FairVersions() {
         <CardHeader className="pb-3">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle className="text-base flex items-center gap-2"><Lock className="h-4 w-4" /> Version timeline</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Search, filter and act on versions</p>
+              <CardTitle className="text-base flex items-center gap-2"><Lock className="h-4 w-4" /> Rebalance timeline</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Busca, filtra y opera sobre las versiones</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full md:w-auto">
               <div className="relative sm:min-w-[220px]">
                 <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input value={query} onChange={(e) => setQuery(e.target.value)} className="pl-8" placeholder="Search by label, author or summary" />
+                <Input value={query} onChange={(e) => setQuery(e.target.value)} className="pl-8" placeholder="Search label, author or summary" />
               </div>
               <select
                 value={authorFilter}
@@ -404,10 +404,10 @@ export default function FairVersions() {
                 onChange={(e) => setStatusFilter(e.target.value as VersionStatusFilter)}
                 className="h-9 border border-border bg-background px-2 text-sm"
               >
-                <option value="all">All statuses</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-                <option value="commercial_draft">Commercial draft</option>
+                <option value="all">All states</option>
+                <option value="published">Publicada</option>
+                <option value="draft">Working draft</option>
+                <option value="commercial_draft">Trading desk draft</option>
               </select>
             </div>
           </div>
@@ -416,19 +416,19 @@ export default function FairVersions() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
-                <TableHead className="w-[140px]">Version</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Author</TableHead>
+                <TableHead className="w-[140px]">Versión</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Autor</TableHead>
                 <TableHead>Summary</TableHead>
-                <TableHead>Impact</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Impacto</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredVersions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">No versions match the selected filters</TableCell>
+                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">No hay versiones que coincidan con los filtros</TableCell>
                 </TableRow>
               ) : (
                 filteredVersions.map((version, index) => {
@@ -471,17 +471,17 @@ export default function FairVersions() {
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         <div className="space-y-0.5">
-                          <p>Stands: <DeltaBadge value={delta.stands} /></p>
-                          <p>Occupancy: <DeltaBadge value={delta.occupancy} suffix="%" /></p>
+                          <p>Holdings: <DeltaBadge value={delta.stands} /></p>
+                          <p>Invested: <DeltaBadge value={delta.occupancy} suffix="%" /></p>
                           <p>Pending: <DeltaBadge value={delta.pending} /></p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-1.5">
-                          <Button variant="outline" size="sm" className="h-8 px-2" onClick={handleEditChanges} title="Open in 3D viewer">
+                          <Button variant="outline" size="sm" className="h-8 px-2" onClick={handleEditChanges} title="Abrir en visor 3D">
                             <Map className="h-3.5 w-3.5" />
                           </Button>
-                          <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => handleCompareWithActive(version.id)} title="Compare with active">
+                          <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => handleCompareWithActive(version.id)} title="Compare with active snapshot">
                             <GitCompare className="h-3.5 w-3.5" />
                           </Button>
                           {version.status === "published" && (
@@ -501,7 +501,7 @@ export default function FairVersions() {
                               size="sm"
                               className="h-8 px-2"
                               onClick={() => handleCreateDraftFromVersion(version.id)}
-                              title="Create draft from this version"
+                              title="Fork working draft from this snapshot"
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
@@ -520,21 +520,21 @@ export default function FairVersions() {
       <AlertDialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm publish</AlertDialogTitle>
+            <AlertDialogTitle>Approve rebalance</AlertDialogTitle>
             <AlertDialogDescription>
-              This will create a new official version from your current draft and make it the active published version.
+              This will publish your working draft as the new approved rebalance and replace the active snapshot.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {draft && (
             <div className="text-sm border border-border rounded-md p-3 space-y-1">
               <p><strong>Draft:</strong> {draft.label}</p>
-              <p><strong>Based on:</strong> {baseVersion?.label || "Unknown"}</p>
-              <p><strong>Impact:</strong> stands <DeltaBadge value={publishDelta?.stands || 0} />, occupancy <DeltaBadge value={publishDelta?.occupancy || 0} suffix="%" />, pending <DeltaBadge value={publishDelta?.pending || 0} /></p>
+              <p><strong>Basado en:</strong> {baseVersion?.label || "Desconocido"}</p>
+              <p><strong>Impacto:</strong> escritorios <DeltaBadge value={publishDelta?.stands || 0} />, ocupación <DeltaBadge value={publishDelta?.occupancy || 0} suffix="%" />, pendientes <DeltaBadge value={publishDelta?.pending || 0} /></p>
             </div>
           )}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handlePublish}>Publish now</AlertDialogAction>
+            <AlertDialogAction onClick={handlePublish}>Approve now</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -542,8 +542,8 @@ export default function FairVersions() {
       <Dialog open={isCompareOpen} onOpenChange={setIsCompareOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Compare versions</DialogTitle>
-            <DialogDescription>Difference summary between selected versions</DialogDescription>
+            <DialogTitle>Compare rebalances</DialogTitle>
+            <DialogDescription>Side-by-side delta between two snapshots.</DialogDescription>
           </DialogHeader>
           {compareLeft && compareRight ? (
             <div className="space-y-3 text-sm">
@@ -563,9 +563,9 @@ export default function FairVersions() {
                 const delta = getVersionDelta(compareLeft, compareRight);
                 return (
                   <div className="border border-border rounded-md p-3 space-y-1">
-                    <p>Stands: <DeltaBadge value={delta.stands} /></p>
-                    <p>Occupancy: <DeltaBadge value={delta.occupancy} suffix="%" /></p>
-                    <p>Pending reservations: <DeltaBadge value={delta.pending} /></p>
+                    <p>Holdings: <DeltaBadge value={delta.stands} /></p>
+                    <p>Invested: <DeltaBadge value={delta.occupancy} suffix="%" /></p>
+                    <p>Pending orders: <DeltaBadge value={delta.pending} /></p>
                   </div>
                 );
               })()}
@@ -581,7 +581,7 @@ export default function FairVersions() {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Select two valid versions to compare.</p>
+            <p className="text-sm text-muted-foreground">Select two snapshots to compare.</p>
           )}
         </DialogContent>
       </Dialog>

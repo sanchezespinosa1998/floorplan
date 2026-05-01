@@ -78,19 +78,19 @@ export default function FairsList() {
       const now = new Date().toISOString();
       const newFair: Fair = {
         id: `custom-fair-${Date.now()}`,
-        name: fairDraft.name || "Nueva feria",
-        edition: fairDraft.edition || "2026",
+        name: fairDraft.name || "New portfolio",
+        edition: fairDraft.edition || "Live · 2026",
         startDate: referenceFair?.startDate ?? now,
         endDate: referenceFair?.endDate ?? now,
         venueId: referenceFair?.venueId ?? "custom-venue",
-        venueName: referenceFair?.venueName ?? "Sin venue",
+        venueName: referenceFair?.venueName ?? "Unassigned mandate",
         status: fairDraft.status,
         occupancy: 0,
         totalStands: 0,
         freeStands: 0,
         reservedStands: 0,
         pendingReservations: 0,
-        responsible: fairDraft.responsible || "Sin responsable",
+        responsible: fairDraft.responsible || "Unassigned PM",
         lastActivity: now,
         currentVersionId: "",
         versions: [],
@@ -164,7 +164,7 @@ export default function FairsList() {
   const fairColumns = useMemo<RecentTableColumn<Fair>[]>(() => [
     {
       key: "name",
-      label: "Name",
+      label: "Portfolio",
       sortable: true,
       sortResolver: (fair: Fair) => fair.name,
       filterable: true,
@@ -179,7 +179,7 @@ export default function FairsList() {
     },
     {
       key: "venue",
-      label: "Venue",
+      label: "Mandate",
       sortable: true,
       sortResolver: (fair: Fair) => fair.venueName,
       filterable: true,
@@ -202,7 +202,7 @@ export default function FairsList() {
     },
     {
       key: "owner",
-      label: "Owner",
+      label: "PM",
       sortable: true,
       sortResolver: (fair: Fair) => fair.responsible,
       filterable: true,
@@ -238,34 +238,34 @@ export default function FairsList() {
       <DashboardStatsSection
         cards={[
           {
-            id: "fairs-active",
-            title: "ACTIVE\nfairs",
+            id: "portfolios-active",
+            title: "Active\nportfolios",
             value: activeFairs.length,
-            subtitle: `Of ${fairsWithEdits.length} visibles`,
+            subtitle: `Of ${fairsWithEdits.length} visible`,
           },
           {
-            id: "fairs-occupancy",
-            title: "AVERAGE\noccupancy",
+            id: "portfolios-invested",
+            title: "Avg.\ninvested",
             value: `${avgOccupancy}%`,
-            subtitle: "Across all fairs",
+            subtitle: "Capital deployed ratio",
           },
           {
-            id: "fairs-total-stands",
-            title: "TOTAL\nstands",
+            id: "portfolios-total-positions",
+            title: "Total\nholdings",
             value: totalStands,
-            subtitle: "Infraestructura disponible",
+            subtitle: "Across all portfolios",
           },
           {
-            id: "fairs-reserved",
-            title: "RESERVED\nstands",
+            id: "portfolios-active-positions",
+            title: "Active\npositions",
             value: reservedStands,
-            subtitle: "Con reserva activa",
+            subtitle: "Filled and held",
           },
           {
-            id: "fairs-pending",
-            title: "PENDING\nbookings",
+            id: "portfolios-pending",
+            title: "Pending\norders",
             value: pendingBookings.length,
-            subtitle: "Requieren validacion",
+            subtitle: "Awaiting compliance",
           },
         ]}
       />
@@ -282,17 +282,17 @@ export default function FairsList() {
 
         <div className="h-full overflow-hidden lg:col-span-2">
           <RecentFairsTable
-            title="Recent fairs"
+            title="Portfolios"
             onCreateRow={handleOpenFairCreate}
-            createRowLabel="Nueva feria"
+            createRowLabel="New portfolio"
             initialViewMode="cards"
-            searchPlaceholder="Search fairs"
-            searchAriaLabel="Buscar ferias"
+            searchPlaceholder="Search portfolios"
+            searchAriaLabel="Search portfolios"
             recentFairsSearch={recentFairsSearch}
             onRecentFairsSearchChange={setRecentFairsSearch}
             items={filteredFairs}
             columns={fairColumns}
-            emptyMessage="No hay ferias que coincidan con la búsqueda."
+            emptyMessage="No portfolios match the current filters."
             initialItemsPerPage={5}
           />
         </div>
@@ -300,8 +300,8 @@ export default function FairsList() {
 
       <DashboardEditModal
         open={isCreatingFair || !!editingFair}
-        title={isCreatingFair ? "Nueva feria" : "Editar feria"}
-        description={isCreatingFair ? "Crea una nueva fila en la tabla de ferias" : "Actualiza la informacion principal de la fila seleccionada"}
+        title={isCreatingFair ? "New portfolio" : "Edit portfolio"}
+        description={isCreatingFair ? "Create a new portfolio row in the table" : "Update the visible fields of the selected row"}
         onOpenChange={(open) => {
           if (!open) {
             setEditingFair(null);
@@ -309,10 +309,10 @@ export default function FairsList() {
           }
         }}
         onSave={handleSaveFairEdit}
-        saveLabel={isCreatingFair ? "Crear feria" : "Guardar cambios"}
+        saveLabel={isCreatingFair ? "Create portfolio" : "Save changes"}
       >
         <label className="grid gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Nombre</span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Name</span>
           <input
             value={fairDraft.name}
             onChange={(event) => setFairDraft((previous) => ({ ...previous, name: event.target.value }))}

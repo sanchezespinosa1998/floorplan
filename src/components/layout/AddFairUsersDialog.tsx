@@ -21,11 +21,11 @@ interface AddFairUsersDialogProps {
 }
 
 const permLabels = {
-  admin: { icon: Settings, perms: ['Control total', 'Edición técnica', 'Edición comercial', 'User management'] },
+  admin: { icon: Settings, perms: ['Control total', 'Edición técnica', 'Edición comercial', 'Gestión de usuarios'] },
   architect: { icon: Shield, perms: ['Edición técnica', 'Validación de plano', 'Lectura comercial'] },
   commercial: { icon: Pencil, perms: ['Edición comercial', 'Solicitud de reservas', 'Lectura técnica'] },
-  organizer: { icon: Shield, perms: ['Lectura de su feria', 'Seguimiento de reservas', 'Consulta de versiones'] },
-  exhibitor: { icon: Eye, perms: ['Lectura de stand', 'Consulta documentación'] },
+  organizer: { icon: Shield, perms: ['Lectura de su plan', 'Seguimiento de reservas', 'Consulta de versiones'] },
+  exhibitor: { icon: Eye, perms: ['Lectura de su escritorio', 'Consulta de documentación'] },
   viewer: { icon: Eye, perms: ['Lectura general'] },
 };
 
@@ -47,7 +47,7 @@ export function AddFairUsersDialog({ open, onOpenChange, fairId, currentUserIds 
 
   const handleSubmit = async () => {
     if (selectedUserIds.length === 0) {
-      toast.error("Please select at least one user");
+      toast.error("Selecciona al menos un usuario");
       return;
     }
 
@@ -56,12 +56,12 @@ export function AddFairUsersDialog({ open, onOpenChange, fairId, currentUserIds 
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      toast.success(`${selectedUserIds.length} user${selectedUserIds.length !== 1 ? 's' : ''} added to the fair`);
+      toast.success(`${selectedUserIds.length} usuario${selectedUserIds.length !== 1 ? 's' : ''} añadido${selectedUserIds.length !== 1 ? 's' : ''} al plan`);
       
       setSelectedUserIds([]);
       onOpenChange(false);
     } catch (err) {
-      toast.error("Failed to add users");
+      toast.error("No se pudieron añadir los usuarios");
     } finally {
       setLoading(false);
     }
@@ -80,10 +80,10 @@ export function AddFairUsersDialog({ open, onOpenChange, fairId, currentUserIds 
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Users className="h-5 w-5 text-primary" />
             </div>
-            Add users to fair
+            Añadir usuarios al plan
           </DialogTitle>
           <DialogDescription>
-            Select users from the system to associate with this fair
+            Selecciona usuarios del sistema para asociarlos a este plan
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +91,7 @@ export function AddFairUsersDialog({ open, onOpenChange, fairId, currentUserIds 
           {availableUsers.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="text-sm">All users are already associated with this fair</p>
+              <p className="text-sm">Todos los usuarios ya están asociados a este plan</p>
             </div>
           ) : (
             <>
@@ -128,7 +128,7 @@ export function AddFairUsersDialog({ open, onOpenChange, fairId, currentUserIds 
               </div>
 
               <p className="text-xs text-muted-foreground">
-                {selectedUserIds.length} user{selectedUserIds.length !== 1 ? 's' : ''} selected
+                {selectedUserIds.length} usuario{selectedUserIds.length !== 1 ? 's' : ''} seleccionado{selectedUserIds.length !== 1 ? 's' : ''}
               </p>
             </>
           )}
@@ -136,15 +136,15 @@ export function AddFairUsersDialog({ open, onOpenChange, fairId, currentUserIds 
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
-            Cancel
+            Cancelar
           </Button>
-          <Button 
-            type="button" 
-            onClick={handleSubmit} 
+          <Button
+            type="button"
+            onClick={handleSubmit}
             disabled={loading || selectedUserIds.length === 0 || availableUsers.length === 0}
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            {loading ? "Adding..." : "Add users"}
+            {loading ? "Añadiendo..." : "Añadir usuarios"}
           </Button>
         </div>
       </DialogContent>

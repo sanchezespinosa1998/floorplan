@@ -43,12 +43,12 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
     try {
       if (isEditing && user) {
         updateUser(user.id, { name, email, role, company: company.trim() || undefined });
-        toast.success(`User "${name}" updated successfully`);
+        toast.success(`Usuario "${name}" actualizado`);
       } else {
         addUser({ name, email, role, company: company.trim() || undefined });
-        toast.success(`User "${name}" created successfully`);
+        toast.success(`Usuario "${name}" creado`);
       }
-      
+
       setName("");
       setEmail("");
       setCompany("");
@@ -56,7 +56,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      toast.error("Error saving user");
+      toast.error("Error al guardar el usuario");
     } finally {
       setLoading(false);
     }
@@ -80,21 +80,21 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               {isEditing ? <Shield className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
             </div>
-            {isEditing ? "Edit user" : "New user"}
+            {isEditing ? "Editar usuario" : "Nuevo usuario"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
-              Full name
+              Nombre completo
             </Label>
             <div className="relative">
               <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="name"
                 type="text"
-                placeholder="e.g. John Doe"
+                placeholder="Ej: Ana López"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="pl-10"
@@ -112,7 +112,7 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
               <Input
                 id="email"
                 type="email"
-                placeholder="e.g. user@company.com"
+                placeholder="Ej: usuario@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-10"
@@ -123,14 +123,14 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
 
           <div className="space-y-2">
             <Label htmlFor="company" className="text-sm font-medium">
-              Company <span className="text-muted-foreground font-normal">(optional)</span>
+              Empresa <span className="text-muted-foreground font-normal">(opcional)</span>
             </Label>
             <div className="relative">
               <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="company"
                 type="text"
-                placeholder="e.g. Acme Corp"
+                placeholder="Ej: TechFlow Labs"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 className="pl-10"
@@ -159,22 +159,22 @@ export function UserFormDialog({ open, onOpenChange, user, onSuccess }: UserForm
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
               {role === "admin" && "Acceso completo a todas las funcionalidades del sistema"}
-              {role === "architect" && "Create and edit projects, plans, and versions"}
-              {role === "commercial" && "Reservation management and customer service"}
-              {role === "organizer" && "Limited tracking for the assigned fair and its operations"}
-              {role === "exhibitor" && "Limited access to the exhibitor portal"}
-              {role === "viewer" && "View only without editing capability"}
+              {role === "architect" && "Crear y editar planes, planos y versiones"}
+              {role === "commercial" && "Gestión de reservas y atención a miembros"}
+              {role === "organizer" && "Seguimiento limitado del plan asignado"}
+              {role === "exhibitor" && "Acceso limitado al portal del miembro"}
+              {role === "viewer" && "Solo visualización, sin edición"}
             </p>
           </div>
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
               <Save className="h-4 w-4 mr-2" />
-              {loading ? "Saving..." : isEditing ? "Update" : "Create user"}
+              {loading ? "Guardando..." : isEditing ? "Actualizar" : "Crear usuario"}
             </Button>
           </DialogFooter>
         </form>

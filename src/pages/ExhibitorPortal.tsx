@@ -12,19 +12,20 @@ import {
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { MapPin, Ruler, Tag, FileText, Phone, Calendar, AlertCircle, Package, Send } from "lucide-react";
 
+// Read-only client portal — beneficiaries see their statement, performance and key dates.
 const services = [
-  { name: 'Electricity 220V', status: 'Contracted' },
-  { name: 'Fiber internet connection', status: 'Contracted' },
-  { name: 'Daily cleaning', status: 'Included' },
-  { name: 'Standard assembly', status: 'Pending confirmation' },
-  { name: 'Exhibitor badges (x4)', status: 'Confirmed' },
+  { name: 'Quarterly performance report', status: 'Contracted' },
+  { name: 'Custodian statements (Citi)',  status: 'Contracted' },
+  { name: 'Tax reporting (FATCA / CRS)',  status: 'Included' },
+  { name: 'ESG impact disclosure',        status: 'Pending confirmation' },
+  { name: 'Annual fee statement',         status: 'Confirmed' },
 ];
 
 const dates = [
-  { label: 'Setup', date: '19-20 Jan 2026', status: 'Pending' },
-  { label: 'Opening', date: '21 Jan 2026', status: 'Confirmed' },
-  { label: 'Closing', date: '25 Jan 2026', status: 'Confirmed' },
-  { label: 'Dismantling', date: '26 Jan 2026', status: 'Pending' },
+  { label: 'NAV cut-off',          date: '15 Apr 2026', status: 'Pending' },
+  { label: 'Quarterly report',     date: '30 Apr 2026', status: 'Confirmed' },
+  { label: 'AGM / fund review',    date: '15 May 2026', status: 'Confirmed' },
+  { label: 'Subscription window',  date: '01 Jun 2026', status: 'Pending' },
 ];
 
 export default function ExhibitorPortal() {
@@ -75,7 +76,7 @@ export default function ExhibitorPortal() {
       standId: stand.id,
       userId: activeUser.id,
       company: assignment.companyName,
-      comments: "Request sent from exhibitor portal",
+      comments: "Order submitted from beneficiary portal",
       status: "pending",
       validators: [assignment.commercialContact.name],
     });
@@ -88,9 +89,9 @@ export default function ExhibitorPortal() {
     return (
       <div className="max-w-3xl mx-auto space-y-4 animate-fade-in">
         <div className="bg-card rounded-lg border border-border p-6">
-          <h1 className="text-xl font-semibold text-foreground">Exhibitor Portal</h1>
+          <h1 className="text-xl font-semibold text-foreground">Beneficiary portal</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            This view is only available for users with exhibitor role.
+            This view is only available to users with the beneficiary role.
           </p>
         </div>
       </div>
@@ -101,9 +102,9 @@ export default function ExhibitorPortal() {
     return (
       <div className="max-w-3xl mx-auto space-y-4 animate-fade-in">
         <div className="bg-card rounded-lg border border-border p-6">
-          <h1 className="text-xl font-semibold text-foreground">Exhibitor Portal</h1>
+          <h1 className="text-xl font-semibold text-foreground">Beneficiary portal</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            No fair assigned for this exhibitor. Contact administration to activate your access.
+            No portfolio assigned to your account. Contact your relationship manager to activate access.
           </p>
         </div>
       </div>
@@ -118,31 +119,31 @@ export default function ExhibitorPortal() {
       <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium text-primary uppercase tracking-wide">Exhibitor Portal</p>
+            <p className="text-xs font-medium text-primary uppercase tracking-wide">Beneficiary portal</p>
             <h1 className="text-2xl font-bold text-foreground mt-1">{assignment.companyName}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{fair.name} {fair.edition}</p>
+            <p className="text-sm text-muted-foreground mt-1">{fair.name} · {fair.edition}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Active version {currentVersion?.label || "—"}
+              Active rebalance {currentVersion?.label || "—"}
             </p>
           </div>
           <StatusBadge status={exhibitorReservation?.status || 'pending'} type="booking" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
         {/* Stand info */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-card rounded-lg border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-4">Mi Stand</h2>
+            <h2 className="font-semibold text-foreground mb-4">Anchor position</h2>
             {!exhibitorStand ? (
-              <p className="text-sm text-muted-foreground">You don't have a main stand assigned yet.</p>
+              <p className="text-sm text-muted-foreground">No anchor position assigned to your portfolio.</p>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
               {[
-                { icon: Tag, label: 'Code', value: exhibitorStand.code },
-                { icon: Ruler, label: 'Surface', value: `${exhibitorStand.area} m²` },
-                { icon: MapPin, label: 'Zone', value: exhibitorStand.zone },
-                { icon: Package, label: 'Type', value: exhibitorStand.type },
+                { icon: Tag, label: 'Ticker', value: exhibitorStand.code },
+                { icon: Ruler, label: 'Exposure', value: `€${exhibitorStand.area.toLocaleString("en-GB")} M` },
+                { icon: MapPin, label: 'Sector', value: exhibitorStand.zone },
+                { icon: Package, label: 'Asset class', value: exhibitorStand.type },
               ].map(item => (
                 <div key={item.label}>
                   <div className="flex items-center gap-1.5 mb-1">
@@ -158,7 +159,7 @@ export default function ExhibitorPortal() {
 
           {/* Mini plan */}
           <div id="plano" className="bg-card rounded-lg border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-4">Plan location</h2>
+            <h2 className="font-semibold text-foreground mb-4">Position on the 3D map</h2>
             <div className="bg-muted/50 rounded-lg p-4">
               <svg viewBox="0 0 400 200" className="w-full h-auto">
                 <defs>
@@ -179,15 +180,15 @@ export default function ExhibitorPortal() {
                 {exhibitorStand && (
                   <text x={30 + 4 * 45 + 19} y={150} textAnchor="middle" className="text-[8px] font-bold" fill="hsl(0,0%,100%)">{exhibitorStand.code}</text>
                 )}
-                <text x={30 + 4 * 45 + 19} y={175} textAnchor="middle" className="text-[7px]" fill="hsl(215,65%,42%)">← Tu stand</text>
+                <text x={30 + 4 * 45 + 19} y={175} textAnchor="middle" className="text-[7px]" fill="hsl(215,65%,42%)">← Your position</text>
               </svg>
             </div>
           </div>
 
           <div className="bg-card rounded-lg border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-4">Request stand bookings</h2>
+            <h2 className="font-semibold text-foreground mb-4">Suggested allocations</h2>
             {availableToRequest.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No stands available to request at this time.</p>
+              <p className="text-sm text-muted-foreground">No suggested allocations open at this time.</p>
             ) : (
               <div className="space-y-2 max-h-64 overflow-auto pr-1">
                 {availableToRequest.slice(0, 12).map(stand => {
@@ -196,7 +197,7 @@ export default function ExhibitorPortal() {
                   return (
                     <div key={stand.id} className="flex items-center justify-between gap-2 py-2 border-b border-border last:border-0">
                       <div>
-                        <p className="text-sm font-medium text-foreground">{stand.code} · {stand.area} m²</p>
+                        <p className="text-sm font-medium text-foreground">{stand.code} · €{stand.area.toLocaleString("en-GB")} M</p>
                         <p className="text-xs text-muted-foreground">{stand.zone}</p>
                       </div>
                       <button
@@ -215,12 +216,12 @@ export default function ExhibitorPortal() {
 
           {/* Services */}
           <div className="bg-card rounded-lg border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-4">Servicios contratados</h2>
+            <h2 className="font-semibold text-foreground mb-4">Services included</h2>
             <div className="space-y-2">
               {services.map(s => (
                 <div key={s.name} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                   <span className="text-sm text-foreground">{s.name}</span>
-                  <span className={`text-xs font-medium ${s.status === 'Contratado' || s.status === 'Confirmado' || s.status === 'Incluido' ? 'text-status-approved' : 'text-status-pending'}`}>
+                  <span className={`text-xs font-medium ${s.status === 'Contracted' || s.status === 'Confirmed' || s.status === 'Included' ? 'text-status-approved' : 'text-status-pending'}`}>
                     {s.status}
                   </span>
                 </div>
@@ -235,7 +236,7 @@ export default function ExhibitorPortal() {
           <div className="bg-card rounded-lg border border-border p-5">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="h-4 w-4 text-primary" />
-              <h2 className="font-semibold text-foreground">Fechas clave</h2>
+              <h2 className="font-semibold text-foreground">Key dates</h2>
             </div>
             <div className="space-y-3">
               {dates.map(d => (
@@ -244,7 +245,7 @@ export default function ExhibitorPortal() {
                     <p className="text-sm font-medium text-foreground">{d.label}</p>
                     <p className="text-xs text-muted-foreground">{d.date}</p>
                   </div>
-                  <span className={`text-xs ${d.status === 'Confirmada' ? 'text-status-approved' : 'text-status-pending'}`}>
+                  <span className={`text-xs ${d.status === 'Confirmed' ? 'text-status-approved' : 'text-status-pending'}`}>
                     {d.status}
                   </span>
                 </div>
@@ -256,17 +257,17 @@ export default function ExhibitorPortal() {
           <div className="bg-card rounded-lg border border-border p-5">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="h-4 w-4 text-primary" />
-              <h2 className="font-semibold text-foreground">Documentation</h2>
+              <h2 className="font-semibold text-foreground">Documents</h2>
             </div>
             <div className="space-y-2">
               {[
-                'Exhibitor manual',
-                `Current plan ${currentVersion?.label || ''}`.trim(),
-                'Technical assembly standards',
-                'Contract terms',
+                'Investor handbook',
+                `Latest rebalance · ${currentVersion?.label || ''}`.trim(),
+                'Risk policy and limits',
+                'Subscription / redemption terms',
               ].map(doc => (
                 <button key={doc} className="w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors text-sm text-primary">
-                  📄 {doc}
+                  {doc}
                 </button>
               ))}
             </div>
@@ -276,16 +277,16 @@ export default function ExhibitorPortal() {
           <div className="bg-card rounded-lg border border-border p-5">
             <div className="flex items-center gap-2 mb-4">
               <Phone className="h-4 w-4 text-primary" />
-              <h2 className="font-semibold text-foreground">Contacto</h2>
+              <h2 className="font-semibold text-foreground">Relationship manager</h2>
             </div>
             <div className="space-y-2">
               <p className="text-sm text-foreground">{assignment.commercialContact.name}</p>
-              <p className="text-xs text-muted-foreground">Comercial asignado</p>
+              <p className="text-xs text-muted-foreground">Portfolio manager</p>
               <p className="text-xs text-primary">{assignment.commercialContact.email}</p>
               <p className="text-xs text-muted-foreground">{assignment.commercialContact.phone}</p>
             </div>
             <button className="w-full mt-4 px-3 py-2 border border-primary text-primary rounded-md text-xs font-medium hover:bg-primary/10 transition-colors">
-              <span className="inline-flex items-center gap-1.5"><Send className="h-3.5 w-3.5" /> Enviar consulta</span>
+              <span className="inline-flex items-center gap-1.5"><Send className="h-3.5 w-3.5" /> Send enquiry</span>
             </button>
           </div>
 
@@ -295,7 +296,7 @@ export default function ExhibitorPortal() {
               <AlertCircle className="h-4 w-4 text-status-pending mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs font-medium text-foreground">Action required</p>
-                <p className="text-xs text-muted-foreground mt-1">Confirm assembly service before January 15.</p>
+                <p className="text-xs text-muted-foreground mt-1">Confirm ESG disclosure preferences before next NAV cut-off.</p>
               </div>
             </div>
           </div>

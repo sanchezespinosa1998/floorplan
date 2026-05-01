@@ -20,7 +20,7 @@ export default function Login() {
     const matchedUser = users.find((user) => user.email.toLowerCase() === rawEmail.toLowerCase());
 
     if (!matchedUser) {
-      setError('No existe un usuario con este email.');
+      setError('No user found with this email.');
       return;
     }
 
@@ -32,13 +32,13 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Introduce tu email y contraseña.');
+      setError('Enter your email and password.');
       return;
     }
 
     const matchedUser = users.find((user) => user.email.toLowerCase() === email.toLowerCase());
     if (!matchedUser) {
-      setError('Email no reconocido. Prueba con uno de los perfiles demo.');
+      setError('Email not recognised. Try one of the demo profiles below.');
       return;
     }
 
@@ -51,7 +51,7 @@ export default function Login() {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center relative overflow-hidden bg-background'>
+    <div className='min-h-[100dvh] flex items-center justify-center relative overflow-hidden bg-background py-6 sm:py-0'>
       {/* Background grid */}
       <div className='absolute inset-0 opacity-[0.03]'>
         <svg className='w-full h-full' xmlns='http://www.w3.org/2000/svg'>
@@ -75,16 +75,16 @@ export default function Login() {
       <div className='absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px]' />
 
       {/* Corner accents */}
-      <div className='absolute top-0 left-0 w-40 h-40 border-l-2 border-t-2 border-primary/30' />
-      <div className='absolute top-0 right-0 w-40 h-40 border-r-2 border-t-2 border-primary/30' />
-      <div className='absolute bottom-0 left-0 w-40 h-40 border-l-2 border-b-2 border-primary/30' />
-      <div className='absolute bottom-0 right-0 w-40 h-40 border-r-2 border-b-2 border-primary/30' />
+      <div className='absolute top-0 left-0 w-16 h-16 sm:w-40 sm:h-40 border-l-2 border-t-2 border-primary/30' />
+      <div className='absolute top-0 right-0 w-16 h-16 sm:w-40 sm:h-40 border-r-2 border-t-2 border-primary/30' />
+      <div className='absolute bottom-0 left-0 w-16 h-16 sm:w-40 sm:h-40 border-l-2 border-b-2 border-primary/30' />
+      <div className='absolute bottom-0 right-0 w-16 h-16 sm:w-40 sm:h-40 border-r-2 border-b-2 border-primary/30' />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className='w-full max-w-md px-6 relative z-10'
+        className='w-full max-w-md px-4 sm:px-6 relative z-10 max-h-[95dvh] overflow-y-auto'
       >
         {/* Logo & Title */}
         <motion.div
@@ -96,8 +96,8 @@ export default function Login() {
           <div className='inline-flex items-center justify-center w-14 h-14 bg-primary mb-4 mx-auto'>
             <MapPin className='w-7 h-7 text-black' />
           </div>
-          <h1 className='text-3xl font-bold text-foreground tracking-tight'>FloorPlan</h1>
-          <p className='text-sm text-muted-foreground mt-1'>Gestión de espacios feriales</p>
+          <h1 className='text-3xl font-bold text-foreground tracking-tight'>PortfolioMap</h1>
+          <p className='text-sm text-muted-foreground mt-1'>3D portfolio &amp; exposure visualizer · €1.2 B AUM</p>
         </motion.div>
 
         {/* Login Card */}
@@ -108,8 +108,8 @@ export default function Login() {
           className='bg-card border border-border p-6'
         >
           <div className='mb-5'>
-            <h2 className='text-lg font-semibold text-foreground'>Iniciar sesión</h2>
-            <p className='text-xs text-muted-foreground mt-1'>Introduce tus credenciales (modo demo)</p>
+            <h2 className='text-lg font-semibold text-foreground'>Sign in</h2>
+            <p className='text-xs text-muted-foreground mt-1'>Demo environment — pick a profile below or use any seeded email.</p>
           </div>
 
           {error && (
@@ -132,7 +132,7 @@ export default function Login() {
                 type='email'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder='tu@empresa.com'
+                placeholder='you@portfoliomap.io'
                 autoComplete='email'
                 className='mt-1.5 w-full px-3 py-2.5 bg-background border border-border text-foreground text-sm outline-none focus:border-primary transition-colors'
               />
@@ -140,7 +140,7 @@ export default function Login() {
 
             <div>
               <label htmlFor='login-password' className='text-xs font-medium text-foreground'>
-                Contraseña
+                Password
               </label>
               <div className='relative mt-1.5'>
                 <input
@@ -171,7 +171,7 @@ export default function Login() {
                 className={`flex items-center justify-center gap-2 ${loading ? 'opacity-0' : 'opacity-100'}`}
               >
                 <Sparkles className='w-4 h-4' />
-                Acceder
+                Sign in
               </span>
               {loading && (
                 <motion.div
@@ -186,7 +186,7 @@ export default function Login() {
           </form>
 
           <div className='mt-5 pt-4 border-t border-border'>
-            <p className='text-[11px] text-muted-foreground mb-2'>Perfiles demo disponibles:</p>
+            <p className='text-[11px] text-muted-foreground mb-2'>Demo profiles:</p>
             <div className='flex flex-wrap gap-2'>
               {users.slice(0, 4).map((user) => (
                 <button
@@ -212,7 +212,7 @@ export default function Login() {
           transition={{ delay: 0.4 }}
           className='text-center text-xs text-muted-foreground mt-6'
         >
-          © 2026 FloorPlan · Sistema de gestión de ferias
+          © 2026 PortfolioMap Capital · Institutional asset management platform
         </motion.p>
       </motion.div>
     </div>

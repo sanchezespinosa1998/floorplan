@@ -69,7 +69,7 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
           pavilions,
           description,
         });
-        toast.success(`Venue "${name}" updated successfully`);
+        toast.success(`Sede "${name}" actualizada`);
       } else {
         const newVenue: Venue = {
           id: `v${venueIdCounter++}`,
@@ -82,13 +82,13 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
         };
         
         venues.push(newVenue);
-        toast.success(`Venue "${name}" created successfully`);
+        toast.success(`Sede "${name}" creada`);
       }
       
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      toast.error(isEditing ? "Error updating venue" : "Error creating venue");
+      toast.error(isEditing ? "Error al actualizar la sede" : "Error al crear la sede");
     } finally {
       setLoading(false);
     }
@@ -111,21 +111,21 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
             <div className="h-10 w-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
               <Building2 className="h-5 w-5 text-sky-500" />
             </div>
-            {isEditing ? "Edit venue" : "New venue"}
+            {isEditing ? "Editar sede" : "Nueva sede"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="venueName" className="text-sm font-medium">
-              Venue name *
+              Nombre de la sede *
             </Label>
             <div className="relative">
               <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="venueName"
                 type="text"
-                placeholder="Ej: IFEMA Madrid"
+                placeholder="Ej: FlowSpace Madrid Centro"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="pl-10"
@@ -136,14 +136,14 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
 
           <div className="space-y-2">
             <Label htmlFor="location" className="text-sm font-medium">
-              Location *
+              Ubicación *
             </Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="location"
                 type="text"
-                placeholder="e.g. Madrid, Spain"
+                placeholder="Ej: Madrid, España"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className="pl-10"
@@ -172,7 +172,7 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
 
             <div className="space-y-2">
               <Label htmlFor="pavilions" className="text-sm font-medium">
-                Number of halls
+                Número de plantas
               </Label>
               <Input
                 id="pavilions"
@@ -187,11 +187,11 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-sm font-medium">
-              Description
+              Descripción
             </Label>
             <textarea
               id="description"
-              placeholder="Venue description..."
+              placeholder="Descripción de la sede..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full min-h-[80px] px-3 py-2 rounded-md border border-border bg-background text-sm outline-none focus:border-primary"
@@ -201,11 +201,11 @@ export function VenueFormDialog({ open, onOpenChange, onSuccess, venue }: VenueF
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
               <Save className="h-4 w-4 mr-2" />
-              {loading ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save changes" : "Create venue")}
+              {loading ? (isEditing ? "Guardando..." : "Creando...") : (isEditing ? "Guardar cambios" : "Crear sede")}
             </Button>
           </DialogFooter>
         </form>

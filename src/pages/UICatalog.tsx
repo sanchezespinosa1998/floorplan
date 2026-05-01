@@ -94,14 +94,14 @@ const uiPrimitives = [
 ];
 
 const productBlocks = [
-  { name: "Topbar", summary: "Search capsule, result dropdown, user block and logout action" },
-  { name: "TopNavigation", summary: "Desktop tabs + mobile menu with permission-aware items" },
-  { name: "StatusBadge", summary: "Unified statuses for stand, booking, fair and version" },
-  { name: "ListFilters", summary: "Global filters with search, selects and date ranges" },
+  { name: "Topbar",         summary: "Search capsule, result dropdown, user block and sign-out action" },
+  { name: "TopNavigation",  summary: "Desktop tabs + mobile menu with permission-aware items" },
+  { name: "StatusBadge",    summary: "Unified statuses for position, order, portfolio and rebalance" },
+  { name: "ListFilters",    summary: "Global filters with search, selects and date ranges" },
   { name: "TableSearchBar", summary: "Fast table-level search with clear action and result count" },
-  { name: "KpiCard", summary: "KPI cards used in dashboard and fair summary blocks" },
-  { name: "Breadcrumbs", summary: "Hierarchical navigation path across pages" },
-  { name: "Planimetria Viewer", summary: "3D editor bars, object panels and context controls" },
+  { name: "KpiCard",        summary: "KPI cards used on the dashboard and portfolio summary blocks" },
+  { name: "Breadcrumbs",    summary: "Hierarchical navigation path across pages" },
+  { name: "3D portfolio map", summary: "Three.js editor toolbars, position panels and context controls" },
 ];
 
 export default function UICatalog() {
@@ -251,7 +251,7 @@ export default function UICatalog() {
               <ListFilters
                 searchValue={filtersSearch}
                 onSearchChange={setFiltersSearch}
-                searchPlaceholder="Search fairs, venues, users"
+                searchPlaceholder="Search portfolios, mandates, users"
                 searchAriaLabel="Catalog filter demo"
                 dateFrom={fromDate}
                 dateTo={toDate}
@@ -301,20 +301,20 @@ export default function UICatalog() {
                   <TableBody>
                     <TableRow>
                       <TableCell>Ana Ruiz</TableCell>
-                      <TableCell>FairPlan</TableCell>
-                      <TableCell>ana@fairplan.com</TableCell>
+                      <TableCell>PortfolioMap Capital</TableCell>
+                      <TableCell>ana.lopez@portfoliomap.io</TableCell>
                       <TableCell><StatusBadge type="booking" status="reserved" /></TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>Carlos Pérez</TableCell>
-                      <TableCell>Expositor Corp</TableCell>
-                      <TableCell>carlos@expo.com</TableCell>
+                      <TableCell>Sanchez Family Office</TableCell>
+                      <TableCell>laura.sanchez@cliente.com</TableCell>
                       <TableCell><StatusBadge type="booking" status="pending" /></TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell>Lucía Mora</TableCell>
-                      <TableCell>Organización SL</TableCell>
-                      <TableCell>lucia@org.com</TableCell>
+                      <TableCell>KPMG Audit</TableCell>
+                      <TableCell>jorge.fernandez@portfoliomap.io</TableCell>
                       <TableCell><StatusBadge type="booking" status="available" /></TableCell>
                     </TableRow>
                   </TableBody>

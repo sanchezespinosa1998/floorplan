@@ -15,52 +15,42 @@ import BookingsList from "./pages/BookingsList";
 import FairVersions from "./pages/FairVersions";
 import FairUsers from "./pages/FairUsers";
 import FairStands from "@/pages/FairStands";
-import FairHistory from "./pages/FairHistory";
 import VenuesList from "./pages/VenuesList";
 import VenueDetail from "./pages/VenueDetail";
 import ExhibitorPortal from "./pages/ExhibitorPortal";
 import UsersManagement from "./pages/UsersManagement";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import PlanViewer from "./pages/PlanViewer";
 import UICatalog from "./pages/UICatalog";
+// Fintech modules
+import Accounts from "./pages/Accounts";
+import Cards from "./pages/Cards";
+import Transactions from "./pages/Transactions";
+import Transfers from "./pages/Transfers";
+import Markets from "./pages/Markets";
+import Crypto from "./pages/Crypto";
+import Lending from "./pages/Lending";
+import Insurance from "./pages/Insurance";
+import Goals from "./pages/Goals";
 
 const STORAGE_KEY = "fairplan-active-user-id";
 
 const queryClient = new QueryClient();
 
-function RedirectToLogin() {
-  const [isReady, setIsReady] = useState(false);
-  
-  useEffect(() => {
-    const storedUserId = window.localStorage.getItem(STORAGE_KEY);
-    if (!storedUserId) {
-      setIsReady(true);
-    } else {
-      window.location.hash = "#/";
-      window.location.reload();
-    }
-  }, []);
-
-  if (!isReady) return null;
-  
-  return <Navigate to="/login" replace />;
-}
-
 function RequireAuth({ children }: { children: JSX.Element }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  
+
   useEffect(() => {
     const storedUserId = window.localStorage.getItem(STORAGE_KEY);
     setIsAuthenticated(!!storedUserId);
   }, []);
 
   if (isAuthenticated === null) return null;
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 }
 
@@ -104,22 +94,33 @@ const App = () => (
           <HashRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/fairs/:fairId/plan" element={<RequireAuth><RequirePermission permission="view_plan" element={<PlanViewer />} /></RequireAuth>} />
               <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
                 <Route path="/" element={<HomeRoute />} />
-                
 
+                {/* Investing — preserved from the previous concept */}
                 <Route path="/fairs" element={<RequirePermission permission="view_fairs" element={<FairsList />} />} />
                 <Route path="/fairs/:fairId" element={<RequirePermission permission="view_fairs" element={<FairDetail />} />}>
-                  <Route path="stands" element={<RequirePermission permission="view_fairs" element={<FairStands />} />} />
-                  <Route path="bookings" element={<RequirePermission permission="view_bookings" element={<BookingsList />} />} />
-                  <Route path="users" element={<RequirePermission permission="view_fair_users" element={<FairUsers />} />} />
+                  <Route path="stands"   element={<RequirePermission permission="view_fairs"          element={<FairStands />} />} />
+                  <Route path="bookings" element={<RequirePermission permission="view_bookings"       element={<BookingsList />} />} />
+                  <Route path="users"    element={<RequirePermission permission="view_fair_users"     element={<FairUsers />} />} />
                   <Route path="versions" element={<RequirePermission permission="view_fair_versions" element={<FairVersions />} />} />
                 </Route>
                 <Route path="/venues" element={<RequirePermission permission="view_venues" element={<VenuesList />} />} />
                 <Route path="/venues/:venueId" element={<RequirePermission permission="view_venues" element={<VenueDetail />} />} />
                 <Route path="/users" element={<RequirePermission permission="manage_users" element={<UsersManagement />} />} />
                 <Route path="/exhibitor" element={<RequireRoleExhibitor element={<ExhibitorPortal />} />} />
+
+                {/* Fintech modules */}
+                <Route path="/accounts"     element={<Accounts />} />
+                <Route path="/cards"        element={<Cards />} />
+                <Route path="/transactions" element={<Transactions />} />
+                <Route path="/transfers"    element={<Transfers />} />
+                <Route path="/markets"      element={<Markets />} />
+                <Route path="/crypto"       element={<Crypto />} />
+                <Route path="/lending"      element={<Lending />} />
+                <Route path="/insurance"    element={<Insurance />} />
+                <Route path="/goals"        element={<Goals />} />
+
                 <Route path="/ui-catalog" element={<UICatalog />} />
               </Route>
               <Route path="*" element={<RequireAuth><NotFound /></RequireAuth>} />

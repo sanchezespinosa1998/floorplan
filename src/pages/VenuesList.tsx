@@ -119,9 +119,9 @@ export default function VenuesList() {
 
         return {
           id: `venue-activity-${venue.id}`,
-          user: "Sistema",
+          user: "System",
           role: "admin" as UserRole,
-          action: "actualizo recinto",
+          action: "updated mandate",
           target: `${venue.name} (${venue.location})`,
           date: lastRelatedActivity ?? "2026-01-01T09:00:00",
           type: "plan",
@@ -146,7 +146,7 @@ export default function VenuesList() {
   const venueColumns = useMemo(() => [
     {
       key: "name",
-      label: "Venue",
+      label: "Mandate",
       sortable: true,
       sortResolver: (v: Venue) => v.name,
       filterable: true,
@@ -161,21 +161,21 @@ export default function VenuesList() {
     },
     {
       key: "area",
-      label: "Area",
+      label: "AUM",
       sortable: true,
       sortResolver: (v: Venue) => v.area,
-      render: (venue: Venue) => `${venue.area.toLocaleString("es-ES")} m2`,
+      render: (venue: Venue) => `€${venue.area.toLocaleString("en-GB")} M`,
     },
     {
       key: "pavilions",
-      label: "Pavilions",
+      label: "Strategies",
       sortable: true,
       sortResolver: (v: Venue) => v.pavilions,
       render: (venue: Venue) => venue.pavilions,
     },
     {
       key: "fairs",
-      label: "Fairs",
+      label: "Portfolios",
       sortable: true,
       sortResolver: (v: Venue) => v.fairCount,
       render: (venue: Venue) => venue.fairCount,
@@ -208,34 +208,34 @@ export default function VenuesList() {
       <DashboardStatsSection
         cards={[
           {
-            id: "venues-total",
-            title: "TOTAL\nvenues",
+            id: "mandates-total",
+            title: "Mandates",
             value: venues.length,
-            subtitle: "Recintos registrados",
+            subtitle: "Active investment mandates",
           },
           {
-            id: "venues-avg-area",
-            title: "AVERAGE\narea",
-            value: `${avgArea.toLocaleString("es-ES")}`,
-            subtitle: "m2 por recinto",
+            id: "mandates-aum",
+            title: "Avg.\nAUM",
+            value: `€${avgArea.toLocaleString("en-GB")} M`,
+            subtitle: "Per mandate",
           },
           {
-            id: "venues-avg-pavilions",
-            title: "AVERAGE\npavilions",
+            id: "mandates-strategies",
+            title: "Avg.\nstrategies",
             value: avgPavilions,
-            subtitle: "Por recinto",
+            subtitle: "Sleeves per mandate",
           },
           {
-            id: "venues-hosted-fairs",
-            title: "HOSTED\nfairs",
+            id: "mandates-portfolios",
+            title: "Active\nportfolios",
             value: totalHostedFairs,
-            subtitle: "Entre todos los venues",
+            subtitle: "Across all mandates",
           },
           {
-            id: "venues-largest",
-            title: "LARGEST\nvenue",
-            value: largestVenue ? `${Math.round(largestVenue.area / 1000)}k` : 0,
-            subtitle: largestVenue?.name ?? "Sin datos",
+            id: "mandates-largest",
+            title: "Largest\nmandate",
+            value: largestVenue ? `€${largestVenue.area.toLocaleString("en-GB")} M` : "—",
+            subtitle: largestVenue?.name ?? "No data",
           },
         ]}
       />
@@ -243,17 +243,17 @@ export default function VenuesList() {
       <div className="mb-[16px] grid grid-cols-1 gap-[10.24px] lg:min-h-0 lg:flex-1 lg:grid-cols-3">
         <div className="h-full overflow-hidden lg:col-span-2">
           <RecentFairsTable
-            title="Recent venues"
+            title="Mandates"
             onCreateRow={handleOpenVenueCreate}
-            createRowLabel="Nuevo venue"
+            createRowLabel="New mandate"
             initialViewMode="cards"
-            searchPlaceholder="Search venues"
-            searchAriaLabel="Buscar recintos"
+            searchPlaceholder="Search mandates"
+            searchAriaLabel="Search mandates"
             recentFairsSearch={recentVenuesSearch}
             onRecentFairsSearchChange={setRecentVenuesSearch}
             items={filteredVenues}
             columns={venueColumns}
-            emptyMessage="No hay recintos que coincidan con la búsqueda."
+            emptyMessage="No mandates match the current filters."
             initialItemsPerPage={5}
           />
         </div>
@@ -270,8 +270,8 @@ export default function VenuesList() {
 
       <DashboardEditModal
         open={isCreatingVenue || !!editingVenue}
-        title={isCreatingVenue ? "Nuevo venue" : "Editar venue"}
-        description={isCreatingVenue ? "Crea un nuevo recinto para la tabla" : "Ajusta los campos visibles de esta fila"}
+        title={isCreatingVenue ? "New mandate" : "Edit mandate"}
+        description={isCreatingVenue ? "Create a new mandate row in the table" : "Update the visible fields of the selected row"}
         onOpenChange={(open) => {
           if (!open) {
             setEditingVenue(null);
@@ -279,10 +279,10 @@ export default function VenuesList() {
           }
         }}
         onSave={handleSaveVenueEdit}
-        saveLabel={isCreatingVenue ? "Crear venue" : "Guardar cambios"}
+        saveLabel={isCreatingVenue ? "Create mandate" : "Save changes"}
       >
         <label className="grid gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Nombre</span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Name</span>
           <input
             value={venueDraft.name}
             onChange={(event) => setVenueDraft((previous) => ({ ...previous, name: event.target.value }))}
@@ -291,7 +291,7 @@ export default function VenuesList() {
         </label>
 
         <label className="grid gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Ubicacion</span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">HQ</span>
           <input
             value={venueDraft.location}
             onChange={(event) => setVenueDraft((previous) => ({ ...previous, location: event.target.value }))}
@@ -301,7 +301,7 @@ export default function VenuesList() {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Area (m2)</span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">AUM (M€)</span>
             <input
               type="number"
               min={0}
@@ -311,7 +311,7 @@ export default function VenuesList() {
             />
           </label>
           <label className="grid gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Pabellones</span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Strategies</span>
             <input
               type="number"
               min={0}

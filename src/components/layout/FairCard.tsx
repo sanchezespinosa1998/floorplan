@@ -30,7 +30,7 @@ export function FairCard() {
             ? "bg-primary-surface text-primary hover:border-primary"
             : "bg-card hover:border-primary"
         )}
-        aria-label="Select active fair"
+        aria-label="Select active portfolio"
       >
         <div className={cn(
           "flex h-[31.25px] w-[31.25px] shrink-0 items-center justify-center border border-border",
@@ -44,13 +44,13 @@ export function FairCard() {
             <>
               <p className="truncate text-[12.8px] font-bold text-foreground">{activeFair.name} {activeFair.edition}</p>
               <p className="truncate text-[12.8px] text-muted-foreground">
-                {new Date(activeFair.startDate).toLocaleDateString("es-ES", { day: "numeric", month: "short" })} - {new Date(activeFair.endDate).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}
+                Inception {new Date(activeFair.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </p>
             </>
           ) : (
             <>
-              <p className="text-[12.8px] font-medium text-muted-foreground">Select fair</p>
-              <p className="text-[10px] text-muted-foreground/70">No active fair</p>
+              <p className="text-[12.8px] font-medium text-muted-foreground">Select portfolio</p>
+              <p className="text-[10px] text-muted-foreground/70">No active portfolio</p>
             </>
           )}
         </div>
@@ -71,7 +71,7 @@ export function FairCard() {
               <Search className="pointer-events-none absolute left-[24px] top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search fair..."
+                placeholder="Search portfolio…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="pl-[39.06px]"
@@ -88,7 +88,7 @@ export function FairCard() {
                 }}
                 className="flex w-full items-center gap-[8.19px] border border-transparent px-[12.8px] py-[8.19px] text-left text-[12.8px] text-muted-foreground transition-colors hover:border-border hover:bg-secondary"
               >
-                <span className="text-[12.8px] italic">No active fair</span>
+                <span className="text-[12.8px] italic">No active portfolio</span>
               </button>
               
               {filteredFairs.map(fair => (
@@ -114,7 +114,7 @@ export function FairCard() {
                     <div className="mt-[5.24px] flex items-center gap-[5.24px] text-[12.8px] text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       <span className="truncate">
-                        {new Date(fair.startDate).toLocaleDateString("es-ES", { day: "numeric", month: "short" })} - {new Date(fair.endDate).toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
+                        Inception {new Date(fair.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </span>
                     </div>
                   </div>
@@ -122,7 +122,7 @@ export function FairCard() {
               ))}
               
               {filteredFairs.length === 0 && search && (
-                <p className="px-[12.8px] py-[12.8px] text-center text-[12.8px] text-muted-foreground">No se encontraron ferias</p>
+                <p className="px-[12.8px] py-[12.8px] text-center text-[12.8px] text-muted-foreground">No matching portfolios</p>
               )}
             </div>
           </div>

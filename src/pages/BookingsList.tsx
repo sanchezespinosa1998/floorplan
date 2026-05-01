@@ -57,12 +57,12 @@ function StandInterestCard({
                 <StatusBadge status={booking.status} type="booking" />
               </div>
               <p className="text-xs text-muted-foreground mb-2">
-                Date: {new Date(booking.date).toLocaleDateString('en-US')} · Validators: {booking.validators.join(', ') || '—'}
+                Date: {new Date(booking.date).toLocaleDateString('en-GB')} · Approvers: {booking.validators.join(', ') || '—'}
               </p>
               <div className="flex items-center gap-2">
                 {can('approve_bookings') && canReview && (
                   <button
-                    aria-label={`Approve booking for stand ${booking.standCode} from ${booking.company}`}
+                    aria-label={`Approve order on ${booking.standCode} from ${booking.company}`}
                     onClick={() => updateBookingStatus(booking.id, 'reserved', booking.standCode)}
                     className="flex items-center gap-1 min-h-[36px] px-3 py-1.5 text-xs rounded border border-border hover:bg-muted transition-colors"
                   >
@@ -71,7 +71,7 @@ function StandInterestCard({
                 )}
                 {can('approve_bookings') && canReview && (
                   <button
-                    aria-label={`Reject booking for stand ${booking.standCode} from ${booking.company}`}
+                    aria-label={`Reject order on ${booking.standCode} from ${booking.company}`}
                     onClick={() => updateBookingStatus(booking.id, 'available', booking.standCode)}
                     className="flex items-center gap-1 min-h-[36px] px-3 py-1.5 text-xs rounded border border-status-conflict text-status-conflict hover:bg-status-conflict/10 transition-colors"
                   >
@@ -110,12 +110,12 @@ export default function BookingsList() {
   const updateBookingStatus = (bookingId: string, status: BookingStatus, standCode: string) => {
     const updated = setBookingStatus(bookingId, status);
     if (!updated) {
-      toast.error(`Could not update booking ${standCode}.`);
+      toast.error(`Could not update order on ${standCode}.`);
       return;
     }
 
     setRefreshSeed(seed => seed + 1);
-    toast.success(`Booking ${standCode}: status updated to ${bookingStatusLabels[status]}.`);
+    toast.success(`Order ${standCode}: status updated to ${bookingStatusLabels[status]}.`);
   };
 
   const groupedByStand = useMemo(() => {
@@ -214,7 +214,7 @@ export default function BookingsList() {
   return (
     <div className="space-y-4 animate-fade-in">
       <Breadcrumbs
-        items={[{ label: "Dashboard", href: "/" }, { label: "Fairs", href: "/fairs" }, { label: fair?.name || 'Fair' }, { label: "Bookings" }]}
+        items={[{ label: "Dashboard", href: "/" }, { label: "Portfolios", href: "/fairs" }, { label: fair?.name || 'Portfolio' }, { label: "Trade orders" }]}
       />
 
       <motion.div
@@ -225,10 +225,10 @@ export default function BookingsList() {
       >
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Fair bookings
+            Trade orders
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {`${paginatedGrouped.length} stands with requests in ${fair?.name || 'the fair'}`}
+            {`${paginatedGrouped.length} tickers with active orders in ${fair?.name || 'this portfolio'}`}
           </p>
         </div>
       </motion.div>
@@ -241,11 +241,11 @@ export default function BookingsList() {
           <thead>
             <tr className="border-b border-border bg-muted/50">
                 {[
-                  { label: 'Stand',            key: 'standCode',          mode: 'text' as const },
-                  { label: 'Interested',       key: 'interested',         mode: 'text' as const },
-                  { label: 'Latest Request',  key: 'latestRequestDate',  mode: null            },
-                  { label: 'Validators',       key: 'validators',         mode: 'text' as const },
-                  { label: 'Status',          key: 'status',             mode: 'enum' as const, opts: statusOptions, lbls: bookingStatusLabels as Record<string,string> },
+                  { label: 'Ticker',       key: 'standCode',          mode: 'text' as const },
+                  { label: 'Counterparty', key: 'interested',         mode: 'text' as const },
+                  { label: 'Latest order', key: 'latestRequestDate',  mode: null            },
+                  { label: 'Approvers',    key: 'validators',         mode: 'text' as const },
+                  { label: 'Status',       key: 'status',             mode: 'enum' as const, opts: statusOptions, lbls: bookingStatusLabels as Record<string,string> },
                 ].map(col => (
                   <SortableHeader
                     key={col.key}
@@ -292,7 +292,7 @@ export default function BookingsList() {
                   <td className="px-2 md:px-4 py-3 font-medium text-foreground">{group.standCode}</td>
                   <td className="px-2 md:px-4 py-3 text-xs text-muted-foreground">{group.interestedPeople.join(', ')}</td>
                   <td className="px-2 md:px-4 py-3 text-muted-foreground">
-                    {new Date(group.latestRequestDate).toLocaleDateString('en-US')}
+                    {new Date(group.latestRequestDate).toLocaleDateString('es-ES')}
                   </td>
                   <td className="px-2 md:px-4 py-3 text-xs text-muted-foreground">{group.validators.join(', ') || '—'}</td>
                   <td className="px-2 md:px-4 py-3">
@@ -335,7 +335,7 @@ export default function BookingsList() {
         </div>
         {paginatedGrouped.length === 0 && (
           <div className="p-8 text-center text-muted-foreground text-sm">
-            No bookings found with the selected filters.
+            No trade orders match the current filters.
           </div>
         )}
       </div>
@@ -361,7 +361,7 @@ export default function BookingsList() {
           })
         ) : (
           <div className="p-8 text-center text-muted-foreground text-sm bg-card border border-border">
-            No bookings found with the selected filters.
+            No trade orders match the current filters.
           </div>
         )}
       </div>

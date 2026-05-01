@@ -29,7 +29,7 @@ import {
 import { CalendarDays, Building2, User as UserIcon, Upload, Save, X, Check } from "lucide-react";
 import { fairs, venues, users, addFair, updateFair, type Fair, type FairStatus, type User } from "@/data/mockData";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/useBreakpoint";
 
 interface FairFormWizardProps {
   open: boolean;
@@ -39,16 +39,16 @@ interface FairFormWizardProps {
 }
 
 const steps = [
-  "Fair data",
-  "Revit file",
-  "Team members",
+  "Datos del plan",
+  "Archivo Revit",
+  "Miembros del equipo",
 ];
 
 const fairStatusOptions: { value: FairStatus; label: string }[] = [
-  { value: "planificación", label: "Planning" },
-  { value: "comercialización", label: "Sales" },
-  { value: "en_curso", label: "En curso" },
-  { value: "finalizada", label: "Finalizada" },
+  { value: "planificación", label: "Planificación" },
+  { value: "comercialización", label: "Comercialización" },
+  { value: "en_curso", label: "Activo" },
+  { value: "finalizada", label: "Finalizado" },
 ];
 
 export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairFormWizardProps) {
@@ -216,11 +216,11 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           venueId,
           venueName: selectedVenue?.name || "",
           status,
-          responsible: responsible || "Unassigned",
+          responsible: responsible || "Sin asignar",
           startDate,
           endDate,
         });
-        toast.success(`Fair "${name} ${edition}" updated successfully`);
+        toast.success(`Plan "${name} ${edition}" actualizado`);
       } else {
         addFair({
           name,
@@ -233,17 +233,17 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           freeStands: 50,
           reservedStands: 0,
           pendingReservations: 0,
-          responsible: responsible || "Unassigned",
+          responsible: responsible || "Sin asignar",
           startDate,
           endDate,
         });
-        toast.success(`Fair "${name} ${edition}" created successfully`);
+        toast.success(`Plan "${name} ${edition}" creado`);
       }
 
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      toast.error(isEditing ? "Error updating fair" : "Error creating fair");
+      toast.error(isEditing ? "Error al actualizar el plan" : "Error al crear el plan");
     } finally {
       setLoading(false);
     }
@@ -253,7 +253,7 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Step {step + 1} of {steps.length}</span>
+          <span>Paso {step + 1} de {steps.length}</span>
           <span>{steps[step]}</span>
         </div>
         <Progress value={((step + 1) / steps.length) * 100} className="h-2" />
@@ -264,12 +264,12 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fairName">
-                Name *
+                Nombre *
               </Label>
               <Input
                 id="fairName"
                 type="text"
-                placeholder="e.g., Fitur"
+                placeholder="Ej: Plan Madrid Centro"
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
@@ -284,12 +284,12 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
 
             <div className="space-y-2">
               <Label htmlFor="edition">
-                Edition *
+                Edición *
               </Label>
               <Input
                 id="edition"
                 type="text"
-                placeholder="e.g., 2027"
+                placeholder="Ej: Q1 2027"
                 value={edition}
                 onChange={(e) => {
                   setEdition(e.target.value);
@@ -305,14 +305,14 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
 
           <div className="space-y-2">
             <Label htmlFor="venue">
-              Venue *
+              Sede *
             </Label>
             <Select value={venueId} onValueChange={(v) => {
               setVenueId(v);
               if (errors.venueId) setErrors({ ...errors, venueId: undefined });
             }}>
               <SelectTrigger aria-invalid={!!errors.venueId}>
-                <SelectValue placeholder="Select venue" />
+                <SelectValue placeholder="Selecciona una sede" />
               </SelectTrigger>
               <SelectContent>
                 {venues.map((venue) => (
@@ -333,7 +333,7 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startDate">
-                Start date *
+                Fecha de inicio *
               </Label>
               <Input
                 id="startDate"
@@ -353,7 +353,7 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
 
             <div className="space-y-2">
               <Label htmlFor="endDate">
-                End date *
+                Fecha de fin *
               </Label>
               <Input
                 id="endDate"
@@ -374,11 +374,11 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">
-                Status
+                Estado
               </Label>
               <Select value={status} onValueChange={(v) => setStatus(v as FairStatus)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder="Selecciona un estado" />
                 </SelectTrigger>
                 <SelectContent>
                   {fairStatusOptions.map((opt) => (
@@ -394,14 +394,14 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
 
           <div className="space-y-2">
             <Label htmlFor="responsible">
-              Manager
+              Responsable
             </Label>
             <div className="relative">
               <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="responsible"
                 type="text"
-                placeholder="Manager name"
+                placeholder="Nombre del responsable"
                 value={responsible}
                 onChange={(e) => setResponsible(e.target.value)}
                 className="pl-10"
@@ -415,12 +415,12 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
         <div className="space-y-4">
           <div className="p-3 rounded-md border border-border bg-muted/40">
             <p className="text-xs text-muted-foreground">
-              Upload a Revit file (.rvt) to associate with this fair. The file will be analyzed for model information.
+              Sube un archivo Revit (.rvt) para asociarlo a este plan. El archivo será analizado para extraer la información del modelo.
             </p>
           </div>
 
           <div>
-            <Label>Revit file (.rvt)</Label>
+            <Label>Archivo Revit (.rvt)</Label>
             <div className="mt-2">
               <label
                 htmlFor="revit-file"
@@ -429,11 +429,11 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    {revitFileName ? revitFileName : "Click to upload or drag and drop"}
+                    {revitFileName ? revitFileName : "Pulsa para subir o arrastra el archivo"}
                   </p>
                   {revitFileName && (
                     <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> File selected
+                      <Check className="w-3 h-3" /> Archivo seleccionado
                     </p>
                   )}
                 </div>
@@ -451,7 +451,7 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           {(isAnalyzing || analysisProgress > 0) && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Analyzing model</span>
+                <span>Analizando modelo</span>
                 <span>{analysisProgress}%</span>
               </div>
               <Progress value={analysisProgress} className="h-2" />
@@ -460,7 +460,7 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
 
           {!isAnalyzing && analysisProgress === 100 && revitFileName && (
             <div className="text-xs text-green-600 flex items-center gap-1">
-              <Check className="w-3 h-3" /> Analysis complete
+              <Check className="w-3 h-3" /> Análisis completado
             </div>
           )}
         </div>
@@ -469,9 +469,9 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
       {step === 2 && (
         <div className="space-y-4">
           <div>
-            <Label>Select team members for this fair</Label>
+            <Label>Selecciona el equipo del plan</Label>
             <p className="text-xs text-muted-foreground mt-1">
-              Choose users who will have access to manage this fair
+              Elige los usuarios que podrán gestionar este plan
             </p>
           </div>
 
@@ -498,7 +498,7 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
           </div>
 
           <p className="text-xs text-muted-foreground">
-            {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
+            {selectedUsers.length} usuario{selectedUsers.length !== 1 ? 's' : ''} seleccionado{selectedUsers.length !== 1 ? 's' : ''}
           </p>
         </div>
       )}
@@ -508,20 +508,20 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
   const actions = (
     <div className="flex items-center justify-between gap-2 pt-2">
       <Button type="button" variant="outline" onClick={handleBack} disabled={step === 0}>
-        Back
+        Atrás
       </Button>
       <div className="flex items-center gap-2">
         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-          Cancel
+          Cancelar
         </Button>
         {step < steps.length - 1 ? (
           <Button type="button" onClick={handleNext} disabled={!canGoNext()}>
-            Next
+            Siguiente
           </Button>
         ) : (
           <Button type="button" onClick={handleSubmit} disabled={loading}>
             <Save className="h-4 w-4 mr-2" />
-            {loading ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save changes" : "Create fair")}
+            {loading ? (isEditing ? "Guardando..." : "Creando...") : (isEditing ? "Guardar cambios" : "Crear plan")}
           </Button>
         )}
       </div>
@@ -537,10 +537,10 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <CalendarDays className="h-5 w-5 text-primary" />
               </div>
-              {isEditing ? "Edit fair" : "New fair"}
+              {isEditing ? "Editar plan" : "Nuevo plan"}
             </DrawerTitle>
             <DrawerDescription>
-              {isEditing ? "Edit fair details" : "Create a new fair with wizard steps"}
+              {isEditing ? "Edita los detalles del plan" : "Crea un nuevo plan paso a paso"}
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-4 overflow-auto space-y-4">{stepContent}</div>
@@ -558,10 +558,10 @@ export function FairFormWizard({ open, onOpenChange, onSuccess, fair }: FairForm
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <CalendarDays className="h-5 w-5 text-primary" />
             </div>
-            {isEditing ? "Edit fair" : "New fair"}
+            {isEditing ? "Editar plan" : "Nuevo plan"}
           </DialogTitle>
           <DialogDescription>
-            {isEditing ? "Edit fair details" : "Create a new fair with wizard steps"}
+            {isEditing ? "Edita los detalles del plan" : "Crea un nuevo plan paso a paso"}
           </DialogDescription>
         </DialogHeader>
         {stepContent}

@@ -196,17 +196,17 @@ export default function UsersManagement() {
     },
     {
       key: "company",
-      label: "Company",
+      label: "Firm",
       sortable: true,
       sortResolver: (u: User) => u.company ?? "",
       filterable: true,
       filterMode: "text",
       filterResolver: (u: User) => u.company ?? "",
-      render: (user: User) => user.company ?? "Sin empresa",
+      render: (user: User) => user.company ?? "—",
     },
     {
       key: "fairs",
-      label: "Fairs",
+      label: "Portfolios",
       sortable: true,
       sortResolver: (u: User) => relatedFairsByUser[u.id] ?? 0,
       render: (user: User) => relatedFairsByUser[user.id] ?? 0,
@@ -237,33 +237,33 @@ export default function UsersManagement() {
         cards={[
           {
             id: "users-total",
-            title: "TOTAL\nusers",
+            title: "Total\nusers",
             value: usersWithEdits.length,
-            subtitle: "Usuarios registrados",
+            subtitle: "Provisioned accounts",
           },
           {
             id: "users-admins",
-            title: "ADMIN\nusers",
+            title: "Heads of\ninvestment",
             value: roleDistribution.admin,
-            subtitle: "Con permisos globales",
+            subtitle: "Full firm access",
           },
           {
             id: "users-architects",
-            title: "ARCHITECT\nusers",
+            title: "Risk\nanalysts",
             value: roleDistribution.architect,
-            subtitle: "Equipo tecnico",
+            subtitle: "Mandate construction & limits",
           },
           {
             id: "users-commercial",
-            title: "COMMERCIAL\nusers",
+            title: "Portfolio\nmanagers",
             value: roleDistribution.commercial,
-            subtitle: "Equipo comercial",
+            subtitle: "Trading desk",
           },
           {
             id: "users-common-role",
-            title: "TOP\nrole",
+            title: "Top\nrole",
             value: roleLabels[mostCommonRole],
-            subtitle: "Rol mas frecuente",
+            subtitle: "Most frequent role",
           },
         ]}
       />
@@ -280,17 +280,17 @@ export default function UsersManagement() {
 
         <div className="h-full overflow-hidden lg:col-span-2">
           <RecentFairsTable
-            title="Recent users"
+            title="Users"
             onCreateRow={handleOpenUserCreate}
-            createRowLabel="Nuevo usuario"
+            createRowLabel="New user"
             initialViewMode="list"
             searchPlaceholder="Search users"
-            searchAriaLabel="Buscar usuarios"
+            searchAriaLabel="Search users"
             recentFairsSearch={recentUsersSearch}
             onRecentFairsSearchChange={setRecentUsersSearch}
             items={filteredUsers}
             columns={usersColumns}
-            emptyMessage="No hay usuarios que coincidan con la búsqueda."
+            emptyMessage="No users match the current filters."
             initialItemsPerPage={5}
           />
         </div>
@@ -298,8 +298,8 @@ export default function UsersManagement() {
 
       <DashboardEditModal
         open={isCreatingUser || !!editingUser}
-        title={isCreatingUser ? "Nuevo usuario" : "Editar usuario"}
-        description={isCreatingUser ? "Crea un nuevo usuario en la tabla" : "Modifica campos clave del usuario seleccionado"}
+        title={isCreatingUser ? "New user" : "Edit user"}
+        description={isCreatingUser ? "Create a new user record in the table" : "Update the visible fields of the selected user"}
         onOpenChange={(open) => {
           if (!open) {
             setEditingUser(null);
@@ -307,10 +307,10 @@ export default function UsersManagement() {
           }
         }}
         onSave={handleSaveUserEdit}
-        saveLabel={isCreatingUser ? "Crear usuario" : "Guardar cambios"}
+        saveLabel={isCreatingUser ? "Create user" : "Save changes"}
       >
         <label className="grid gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Nombre</span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Name</span>
           <input
             value={userDraft.name}
             onChange={(event) => setUserDraft((previous) => ({ ...previous, name: event.target.value }))}
@@ -330,7 +330,7 @@ export default function UsersManagement() {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Rol</span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Role</span>
             <select
               value={userDraft.role}
               onChange={(event) => setUserDraft((previous) => ({ ...previous, role: event.target.value as UserRole }))}
@@ -344,7 +344,7 @@ export default function UsersManagement() {
             </select>
           </label>
           <label className="grid gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Empresa</span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[1px] text-[#9a9a9a]">Firm</span>
             <input
               value={userDraft.company}
               onChange={(event) => setUserDraft((previous) => ({ ...previous, company: event.target.value }))}

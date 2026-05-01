@@ -1,16 +1,20 @@
 import { useState } from "react";
-import { Menu, X, LayoutDashboard, Building2, CalendarDays, Users, User } from "lucide-react";
+import { Menu, X, LayoutDashboard, Wallet, CreditCard, Receipt, LineChart, Briefcase, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useProfile } from "@/context/ProfileContext";
 import { type Permission } from "@/lib/authorization";
 import { cn } from "@/lib/utils";
 
+// Primary nav: most-used everyday modules. The full catalogue lives in the
+// "Modules" launcher in the topbar.
 const navItems = [
-  { title: "Dashboard", to: "/", icon: LayoutDashboard, permission: "view_dashboard" as Permission },
-  { title: "Venues", to: "/venues", icon: Building2, permission: "view_venues" as Permission },
-  { title: "Fairs", to: "/fairs", icon: CalendarDays, permission: "view_fairs" as Permission },
-  { title: "Users", to: "/users", icon: Users, permission: "manage_users" as Permission },
-  { title: "Exhibitor", to: "/exhibitor", icon: User, permission: "view_exhibitor_portal" as Permission },
+  { title: "Dashboard",   to: "/",          icon: LayoutDashboard, permission: "view_dashboard"        as Permission },
+  { title: "Accounts",    to: "/accounts",  icon: Wallet,          permission: "view_dashboard"        as Permission },
+  { title: "Cards",       to: "/cards",     icon: CreditCard,      permission: "view_dashboard"        as Permission },
+  { title: "Transactions",to: "/transactions", icon: Receipt,      permission: "view_dashboard"        as Permission },
+  { title: "Markets",     to: "/markets",   icon: LineChart,       permission: "view_dashboard"        as Permission },
+  { title: "Portfolios",  to: "/fairs",     icon: Briefcase,       permission: "view_fairs"            as Permission },
+  { title: "Beneficiary", to: "/exhibitor", icon: User,            permission: "view_exhibitor_portal" as Permission },
 ];
 
 export function DashboardNav() {

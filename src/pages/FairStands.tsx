@@ -130,16 +130,16 @@ export default function FairStands() {
       }
 
       await requestBooking(standId, activeUser.id, {
-        company: stand.company || `${activeUser.name} - Request`,
-        comments: "Request created from stands tab.",
+        company: stand.company || `${activeUser.name} order`,
+        comments: "Order ticket opened from the holdings list.",
         status: "requested",
         validators: [],
       });
 
       setRefreshSeed(value => value + 1);
-      toast.success(`Request sent for ${stand.code}. Check Bookings to approve/reject.`);
+      toast.success(`Order submitted for ${stand.code}. Review Trade orders to approve / reject.`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not create request.";
+      const message = error instanceof Error ? error.message : "Could not submit the order.";
       toast.error(message);
     } finally {
       setRequestingStandId(null);
@@ -151,9 +151,9 @@ export default function FairStands() {
       <Breadcrumbs
         items={[
           { label: "Dashboard", href: "/" },
-          { label: "Fairs", href: "/fairs" },
-          { label: fair?.name || "Fair" },
-          { label: "Stands" },
+          { label: "Portfolios", href: "/fairs" },
+          { label: fair?.name || "Portfolio" },
+          { label: "Holdings" },
         ]}
       />
 
@@ -164,16 +164,16 @@ export default function FairStands() {
         className="flex flex-wrap items-start justify-between gap-3"
       >
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Fair stands</h1>
+          <h1 className="text-2xl font-bold text-foreground">Holdings</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {filteredStands.length} stands shown in {fair?.name || "the fair"}
+            {filteredStands.length} positions in {fair?.name || "this portfolio"}
           </p>
         </div>
         <Link
           to={`/fairs/${fairId}/bookings`}
           className="px-3 py-2 rounded-md border border-border text-sm hover:bg-muted/60 transition-colors"
         >
-          Go to Bookings
+          Open trade orders
         </Link>
       </motion.div>
 
@@ -184,10 +184,10 @@ export default function FairStands() {
           <thead>
             <tr className="border-b border-border bg-muted/50">
               {[
-                { label: 'Name',          key: 'code',     mode: 'text' as const, opts: undefined,                                  lbls: undefined },
-                { label: 'Area (m2)',   key: 'area',     mode: null,            opts: undefined,                                  lbls: undefined },
-                { label: 'Status',      key: 'status',   mode: 'enum' as const, opts: statusOptions,                             lbls: standStatusLabels as Record<string,string> },
-                { label: 'Owner',      key: 'owner',    mode: 'enum' as const, opts: ownerOptions,                               lbls: undefined },
+                { label: 'Ticker',         key: 'code',   mode: 'text' as const, opts: undefined,            lbls: undefined },
+                { label: 'Exposure (M€)',  key: 'area',   mode: null,            opts: undefined,            lbls: undefined },
+                { label: 'Status',         key: 'status', mode: 'enum' as const, opts: statusOptions,        lbls: standStatusLabels as Record<string,string> },
+                { label: 'Issuer',         key: 'owner',  mode: 'enum' as const, opts: ownerOptions,         lbls: undefined },
               ].map(col => (
                 <SortableHeader
                   key={col.key}
@@ -228,7 +228,7 @@ export default function FairStands() {
                   className="hover:bg-muted/30 transition-colors"
                 >
                   <td className="px-3 py-3 font-medium text-foreground">{stand.code}</td>
-                  <td className="px-3 py-3 text-muted-foreground">{stand.area} m²</td>
+                  <td className="px-3 py-3 text-muted-foreground">€{stand.area.toLocaleString("en-GB")} M</td>
                   <td className="px-3 py-3 text-muted-foreground"><StatusBadge status={stand.status} type="stand" /></td>
                   <td className="px-3 py-3 text-muted-foreground">{stand.company || '—'}</td>
                   <td className="px-3 py-3">
@@ -238,7 +238,7 @@ export default function FairStands() {
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded border border-border hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <SendHorizonal className="h-3.5 w-3.5" />
-                      {requestingStandId === stand.id ? "Sending..." : "Request"}
+                      {requestingStandId === stand.id ? "Submitting…" : "Open order"}
                     </button>
                   </td>
                 </motion.tr>
@@ -249,9 +249,54 @@ export default function FairStands() {
         </div>
       </div>
 
+      {/* Cards - Mobile */}
+      <div className="md:hidden space-y-3">
+        <TableSearchBar value={tableSearch} onChange={setTableSearch} resultCount={sortedStands.length} />
+        {paginatedStands.length > 0 ? (
+          paginatedStands.map((stand, index) => {
+            const canRequest = canRequestBooking && stand.status === "available";
+            return (
+              <motion.div
+                key={stand.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + index * 0.05 }}
+                className="bg-card border border-border rounded-md p-4 space-y-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground truncate">{stand.code}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stand.zone} · {stand.type}</p>
+                  </div>
+                  <StatusBadge status={stand.status} type="stand" />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <p className="text-muted-foreground uppercase tracking-wide text-[10px]">Exposure</p>
+                    <p className="text-foreground font-medium">€{stand.area.toLocaleString("en-GB")} M</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground uppercase tracking-wide text-[10px]">Issuer</p>
+                    <p className="text-foreground font-medium truncate">{stand.company || '—'}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRequestBooking(stand.id)}
+                  disabled={!canRequest || requestingStandId === stand.id}
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-[44px] px-3 text-sm rounded border border-border hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <SendHorizonal className="h-4 w-4" />
+                  {requestingStandId === stand.id ? "Submitting…" : "Open order"}
+                </button>
+              </motion.div>
+            );
+          })
+        ) : null}
+      </div>
+
       {filteredStands.length === 0 && (
         <div className="p-8 text-center text-muted-foreground text-sm bg-card border border-border">
-          No hay stands que coincidan con los filtros.
+          No holdings match the current filters.
         </div>
       )}
 

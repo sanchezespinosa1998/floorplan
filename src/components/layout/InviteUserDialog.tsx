@@ -31,12 +31,12 @@ export function InviteUserDialog({ open, onOpenChange }: InviteUserDialogProps) 
     e.preventDefault();
 
     if (!email.trim()) {
-      setError("Email is required");
+      setError("El email es obligatorio");
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+      setError("Introduce un email válido");
       return;
     }
 
@@ -45,13 +45,13 @@ export function InviteUserDialog({ open, onOpenChange }: InviteUserDialogProps) 
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success(`Invitation sent to ${email}`);
-      
+
+      toast.success(`Invitación enviada a ${email}`);
+
       setEmail("");
       onOpenChange(false);
     } catch (err) {
-      toast.error("Failed to send invitation");
+      toast.error("No se pudo enviar la invitación");
     } finally {
       setLoading(false);
     }
@@ -71,22 +71,22 @@ export function InviteUserDialog({ open, onOpenChange }: InviteUserDialogProps) 
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
-            Invite user
+            Invitar usuario
           </DialogTitle>
           <DialogDescription>
-            Send an invitation email to add a new user to the platform
+            Envía un email de invitación para añadir un usuario a la plataforma
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="email">Correo electrónico</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="user@example.com"
+                placeholder="usuario@empresa.com"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -103,11 +103,11 @@ export function InviteUserDialog({ open, onOpenChange }: InviteUserDialogProps) 
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
               <Send className="h-4 w-4 mr-2" />
-              {loading ? "Sending..." : "Send invitation"}
+              {loading ? "Enviando..." : "Enviar invitación"}
             </Button>
           </div>
         </form>
